@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import webcamera.com.vn.webapp.DTO.UserDTO.UserCreateRequestDTO;
+import webcamera.com.vn.webapp.DTO.UserDTO.UserUpdateRequestDTO;
 import webcamera.com.vn.webapp.entity.User;
 import webcamera.com.vn.webapp.exceptions.ValidationErrorResponse;
 import webcamera.com.vn.webapp.exceptions.Violations;
@@ -18,6 +19,7 @@ import webcamera.com.vn.webapp.repository.UserRepository;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -118,7 +120,7 @@ public class UserService {
             newEntity.setFirstName(objCreate.getFirstName());
             newEntity.setEmail(objCreate.getEmail());
             newEntity.setPhone(objCreate.getPhone());
-            newEntity.setStatus((long)1);//set mac dinh
+            newEntity.setStatus((long)1);//set mac dinh avatar mac dinh
 
            // c-2 yeu cau repository luu lai khoi tao tren
             // thuc hien nhan ten dk username va tien hanh kiem tra tranh trung ten username khi dang ky
@@ -133,7 +135,7 @@ public class UserService {
 
                 //c-4 tra ve ket qua cho nguoi dung theo chuan restfullAPI
                 response.put("data", createEntity);
-                response.put("statuscode", 201);
+                response.put("statuscode", 200);
                 response.put("msg", " create thanh cong");
 
                 return new ResponseEntity<>(response, HttpStatus.OK);
@@ -152,9 +154,93 @@ public class UserService {
 
 
     /*III - Put(Update0*/
+    public ResponseEntity<Map<String, Object>> updateUser(Integer id, UserUpdateRequestDTO objEdit){
+        // khoi tao bien response luu tru ket qua tra ve
+        Map<String, Object> response = new HashMap<>();
+
+        // nho repo tim kiem entity(dua tren id) ma muon update
+        Optional<User> optFound = userRepo.findById(id);
+        if(optFound.isPresent()){
+            //nhan dc id vua tim kiem va gan vao entity cua uder de doi chung
+            User entityEdit = optFound.get();
+
+            //kiem tra va cap nha cac truong tt null hoawc empty -> tien hanh bo qua va ghi nhan
+            if(objEdit.getPassword() != null && !objEdit.getPassword().isEmpty()){
+                entityEdit.setPassword(objEdit.getPassword());
+            }
+            if(objEdit.getLastName() != null && !objEdit.getLastName().isBlank()){
+                entityEdit.setLastName(objEdit.getLastName());
+            }
+            if(objEdit.getFirstName() != null && !objEdit.getFirstName().isEmpty()){
+                entityEdit.setFirstName(objEdit.getFirstName());
+            }
+            if(objEdit.getEmail() != null && !objEdit.getEmail().isEmpty()){
+                entityEdit.setEmail(objEdit.getEmail());
+            }
+            if(objEdit.getPhone() != null && !objEdit.getPhone().isEmpty()){
+                entityEdit.setPhone(objEdit.getPhone());
+            }
+            if(objEdit.getAddress() != null && !objEdit.getAddress().isEmpty()){
+                entityEdit.setAddress(objEdit.getAddress());
+            }
+            if(objEdit.getStatus() != null){
+                entityEdit.setStatus(objEdit.getStatus());
+            }
+
+            //nhow repository update
+            userRepo.save(entityEdit);
+
+            //tra ve thogn bao chuan restfull api
+            response.put("data", entityEdit);
+            response.put("statuscode", 200);
+            response.put("msg", "update thanh cong roi yeah yeah");
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }else{
+            response.put("data", null);
+            response.put("statuscode", 404);
+            response.put("msg", " update khong thanh cong");
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+    }
 
 
     /*IV- Delete(xoa)*/
+    public ResponseEntity<Map<String, Object>> deleteUsre(Integer id){
+        //a - khoi tao bien response luu tru ket qua tra ve
+        Map<String, Object> response = new HashMap<>();
+
+        // nho repository goi method tim kiem id can xoa
+        /*
+        * Optional:
+        *  + la mot lop trong java(java.util.Optional) dc gioi thieu tu java 8
+        *  + no la mot container object co the chua mot gia tri khong null  hoac rong emtpy
+        *  + muc tieu chinh Optional la giup iam thieu loi NullPointerException khi ma minhf
+        * xu ly voi cac gia tri null
+        * */
+        Optional<User> optFound = userRepo.findById(id);
+        if(optFound.isPresent()){
+            //neu ton tai id can tim thi lay no ra -> ghi nhan no vao entity
+            User delEntity = optFound.get();
+            //nho repository xoa
+            userRepo.delete((delEntity));
+
+            //tra ve ket qua nguioi dung chuan restfull api
+            response.put("data", null);
+            response.put("statuscode", 200);
+            response.put("msg", "delete thanh cong oh yeah yeah");
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }else{
+            //tra ve chuan restfull api thong bao la khong ton tai id can xoa
+            response.put("data", null);
+            response.put("statuscode", 404);
+            response.put("msg", "tai khoan xoa khong ton tai");
+
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+    }
 
 
 }

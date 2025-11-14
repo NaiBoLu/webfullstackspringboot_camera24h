@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import webcamera.com.vn.webapp.DTO.UserDTO.UserCreateRequestDTO;
+import webcamera.com.vn.webapp.DTO.UserDTO.UserUpdateRequestDTO;
 import webcamera.com.vn.webapp.service.UserService;
 
 import java.util.HashMap;
@@ -36,7 +37,7 @@ public class UserController {
     /*
      + @PostMapping:thiet lap mapping theo chuan method post - create trong crud cua repository cuar spring boot
      */
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<Map<String, Object>> Create(@RequestBody @Valid UserCreateRequestDTO res){
         //xu ly bat loi nem ra throw tu serive bang cach dung try catch
         try{
@@ -52,4 +53,24 @@ public class UserController {
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
+    /*
+    * @PathVariable: anotation dc su dung de trich xuat gia thong qua url  api va anh xa no toi
+    * tham so cua method controler nay,
+    *  -> day la cach ma g ia tri cua id trong dg dan path dc truyen den tham so id cua mehotd delete
+    * */
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Map<String, Object>> delete(@PathVariable Integer id){
+        return userService.deleteUsre(id);
+    }
+
+
+    /*update - PUT*/
+    @PutMapping("/update/{id}")
+    public ResponseEntity<Map<String, Object>> update(@PathVariable Integer id, @RequestBody UserUpdateRequestDTO res){
+        return userService.updateUser(id, res);
+    }
+
+
 }
