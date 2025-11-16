@@ -2,11 +2,13 @@ package webcamera.com.vn.webapp.controller;
 /*trung tam dieu phoi hoat dong cua mo hinh 3 lop*/
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import webcamera.com.vn.webapp.DTO.UserDTO.UserCreateRequestDTO;
 import webcamera.com.vn.webapp.DTO.UserDTO.UserUpdateRequestDTO;
 import webcamera.com.vn.webapp.service.UserService;
@@ -38,20 +40,23 @@ public class UserController {
      + @PostMapping:thiet lap mapping theo chuan method post - create trong crud cua repository cuar spring boot
      */
     @PostMapping("/create")
-    public ResponseEntity<Map<String, Object>> Create(@RequestBody @Valid UserCreateRequestDTO res){
-        //xu ly bat loi nem ra throw tu serive bang cach dung try catch
-        try{
-            //goi den service luu csdl tu dto(dc gui len tu client thong qua create form dang ky user)
-            return userService.createUser(res);
-        }catch(Exception ex){
-            //khoi tao bien luu  response trve
-            Map<String, Object> response = new HashMap<>();
-            response.put("data", ex.getMessage());
-            response.put("statuscode", 501);
-            response.put("msg","du lieu co loi vui long kiem tra lai");
+    public ResponseEntity<Map<String, Object>> Create(@RequestParam("file")MultipartFile file,
+                                                      @RequestParam("data")  String jsonData){
 
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        //goi class ObjectMapper de mapp json(param: data) gui len -> parse json do thanh value trong dto cua usercreateReqstDTO
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        //goi khoi tao lop dto cua user
+        UserCreateRequestDTO objDTO = null;
+
+        //tien hanh cho DTO doc va ghi nhan value tu json gui len da dc map thog qua lop OjectMapper
+        try{
+            objDTO = objectMapper.readValue(jsonData, UserCreateRequestDTO.class);
+        }catch(Exception ex){
+            ex.printStackTrace();
         }
+
+        return userService.createUser(objDTO, file);
     }
 
 

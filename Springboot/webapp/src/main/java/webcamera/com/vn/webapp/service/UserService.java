@@ -3,6 +3,7 @@ package webcamera.com.vn.webapp.service;
 
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import webcamera.com.vn.webapp.DTO.UserDTO.UserCreateRequestDTO;
 import webcamera.com.vn.webapp.DTO.UserDTO.UserUpdateRequestDTO;
 import webcamera.com.vn.webapp.entity.User;
@@ -17,6 +19,13 @@ import webcamera.com.vn.webapp.exceptions.ValidationErrorResponse;
 import webcamera.com.vn.webapp.exceptions.Violations;
 import webcamera.com.vn.webapp.repository.UserRepository;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -30,6 +39,14 @@ public class UserService {
 
     @Autowired
     private webcamera.com.vn.webapp.repository.UserRepository userRepo;
+
+    /*tao bien string lay url cau hinh luu file da thiet lap ben application.properties
+    * @Value: annotation dc su dung de gan gia tri cho mot bien tu cac nguon:
+    *  + application.properties/application.yaml
+    *  ....
+    * */
+    @Value("${file.upload-dir}")
+    private String uploadDir;
 
     /*I - GET ->lay va do du lieu co phan trang*/
     public ResponseEntity<Map<String, Object>> getAllUserPagination(int pageNumber, int pageSize, String sortby){
@@ -49,7 +66,7 @@ public class UserService {
         if(pageResult.hasContent()){
             //tra ket qua cho nguoi dung -> tra theo chuan restfull APi sieu cap vip pro
             response.put("data", pageResult.getContent());
-            response.put("statuscode", 200);
+            response.put("statuscode", 201);
             response.put("msg", "get du lieu thanh cong oh yeah da qua xa da");
 
             response.put("currentpage", pageNumber);
@@ -73,9 +90,48 @@ public class UserService {
 
 
     /*II - Post(create)*/
-    public ResponseEntity<Map<String, Object>> createUser(UserCreateRequestDTO objCreate){
+    //MultipartFile: la mot interface trong spring, dc su dung de xu ly cac tep files -> dc upload thog qua giao thuc HTTP request
+    public ResponseEntity<Map<String, Object>> createUser(UserCreateRequestDTO objCreate, MultipartFile file){
         //a - khoi tao bien response de luu tru ket qua tra ve
         Map<String, Object> response = new HashMap<>();
+
+        /*******xu ly luu ruot img khi create Use******/
+        //tao chuoi randomString  rong ->
+        String randomString = "";
+
+        //su dung datetime luu thong tin anh tranh trung ten va thoi gian luu anh
+        DateTimeFormatter iso_8601_formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
+        randomString = LocalDateTime.now().format(iso_8601_formatter);
+
+        /*thiet lap file path lay dung ten goc o dia luu folder trong project
+        * => thg thiet lap file chi dinh url lay: D:\\DOWNLOAD\\img\\....
+        * <=> tuy nhien, ntn vd may windown url  D:\\DOWNLOAD\\img\\.... nhung o may mac  D:/DOWNLOAD/img/....
+        * nhu vay neu thiet lap code nay o tren may windown thi qua may mac doan code rootFolder nay khong sai
+        * nhung ma khac he dieu hanh thi no khong hieu.. viet code nt la viet code co dinh viet code ngu
+        * ==-=> lib java.nio.file.Paths;
+        * */
+        String rootFolder = Paths.get("").toAbsolutePath().toString();
+
+        /*tao duong dan xu ly luu file
+        *  + file.getOriginalFilename(); method xu ly ghi nhan lay cai file ruot anh va tien hanh ghi nhan va luu vao trong folder uploads
+        *  + file.separator: co nhiem vu chinh la dung de chi dau phan cach thu muc: // cua windown, hay dau \ cua mac
+        *  + uploadDir: chinh la ten file lien ket voi cau hinh properties ben file application.properties ban nay
+        * */
+        String newFile = randomString + "_" + file.getOriginalFilename();
+        String filePath = rootFolder + File.separator + uploadDir + File.separator + newFile;
+
+        //tien hanh xu ly luu file vao thu muc uploads
+        File destinationFile = new File(filePath);
+
+        /*tien hanh tao folder uploads trong projects neu no khong ton tai*/
+        destinationFile.getParentFile().mkdir();
+
+        //tien hanh lay ruot anh(anh goc, kich co anh(nhieu mb...)) ghi nhan va luu vao file
+        try{
+            file.transferTo(destinationFile);
+        }catch(IOException e){
+            e.printStackTrace();
+        }
 
         //b-1 xu ly service  validation exception kiem tra tinh hop le khi dien thong tin
         ValidationErrorResponse responseError = new ValidationErrorResponse();
@@ -119,6 +175,10 @@ public class UserService {
             newEntity.setLastName(objCreate.getLastName());
             newEntity.setFirstName(objCreate.getFirstName());
             newEntity.setEmail(objCreate.getEmail());
+
+            //xu ly goi repo luu img co ruot
+            newEntity.setAvatar(newFile);
+
             newEntity.setPhone(objCreate.getPhone());
             newEntity.setStatus((long)1);//set mac dinh avatar mac dinh
 
@@ -138,7 +198,7 @@ public class UserService {
                 response.put("statuscode", 200);
                 response.put("msg", " create thanh cong");
 
-                return new ResponseEntity<>(response, HttpStatus.OK);
+                return new ResponseEntity<>(response, HttpStatus.CREATED);
             }
         }else{
             response.put("data", responseError);
@@ -223,6 +283,18 @@ public class UserService {
         if(optFound.isPresent()){
             //neu ton tai id can tim thi lay no ra -> ghi nhan no vao entity
             User delEntity = optFound.get();
+
+            /*xu ly tien hanh xoa ruot anh ung voi taikhoan cua anh do*/
+            String rootFolder = Paths.get("").toAbsolutePath().toString();
+            Path filePath = Path.of(rootFolder + File.separator + uploadDir + File.separator + delEntity.getAvatar());
+
+            try{
+                //tien hanh deleteIfExits co ton tai no moi xoa
+                Files.deleteIfExists(filePath);
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+
             //nho repository xoa
             userRepo.delete((delEntity));
 
