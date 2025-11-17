@@ -2,8 +2,10 @@ package webcamera.com.vn.webapp.controller;
 /*trung tam dieu phoi hoat dong cua mo hinh 3 lop*/
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
+import org.hibernate.type.descriptor.java.ObjectJavaType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -73,8 +75,22 @@ public class UserController {
 
     /*update - PUT*/
     @PutMapping("/update/{id}")
-    public ResponseEntity<Map<String, Object>> update(@PathVariable Integer id, @RequestBody UserUpdateRequestDTO res){
-        return userService.updateUser(id, res);
+    public ResponseEntity<Map<String, Object>> update(@PathVariable Integer id,
+                                                      @RequestParam(value = "file", required = false) MultipartFile file,
+                                                      @RequestParam("data") String jsonData){
+        /*goi class ObjectMapper: de mapp json(param: data -> parse(chuyen doi) json  thanh value trong csdl*/
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        //khoi t ao lop dto update
+        UserUpdateRequestDTO objDTO = null;
+
+        //tien hanh cho DTO doc va ghi nhan value json gui len da dc map thong qua lop ObjectMapper
+        try{
+            objDTO = objectMapper.readValue(jsonData, UserUpdateRequestDTO.class);
+        }catch(JsonProcessingException e){
+            e.printStackTrace();
+        }
+        return userService.updateUser(id, objDTO, file);
     }
 
 

@@ -183,7 +183,8 @@ public class UserService {
             newEntity.setStatus((long)1);//set mac dinh avatar mac dinh
 
            // c-2 yeu cau repository luu lai khoi tao tren
-            // thuc hien nhan ten dk username va tien hanh kiem tra tranh trung ten username khi dang ky
+            // thuc hien
+            // nhan ten dk username va tien hanh kiem tra tranh trung ten username khi dang ky
            User existingUser = userRepo.findByUsername(objCreate.getUsername());
 
            // c-3 thuc hien kiem tra ds data trong mysql co trung ten username nao khong
@@ -214,7 +215,7 @@ public class UserService {
 
 
     /*III - Put(Update0*/
-    public ResponseEntity<Map<String, Object>> updateUser(Integer id, UserUpdateRequestDTO objEdit){
+    public ResponseEntity<Map<String, Object>> updateUser(Integer id, UserUpdateRequestDTO objEdit, MultipartFile file){
         // khoi tao bien response luu tru ket qua tra ve
         Map<String, Object> response = new HashMap<>();
 
@@ -237,6 +238,53 @@ public class UserService {
             if(objEdit.getEmail() != null && !objEdit.getEmail().isEmpty()){
                 entityEdit.setEmail(objEdit.getEmail());
             }
+
+            /*tien hanh xu ly update img co ruot anh*/
+            if(file != null){
+                /*qui trinh 1- update file moi(khoi create file img moi) vao thu muc mong doi*/
+                //tao chuoi randomString rong de luu gia tri bien moi vao
+                String randomString = "";
+
+                //tien hanh luu ten img voi dang tenanh_datetime
+                DateTimeFormatter iso_fommater = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
+                randomString = LocalDateTime.now().format(iso_fommater);
+
+                //tao muc lay folder goc chua anh
+                String rootFolger = Paths.get("").toAbsolutePath().toString();
+
+                //tao newFile chua anh moi(ruot anh moi)
+                String newFile = randomString + "_" + file.getOriginalFilename();
+
+                /*tao url dong luu anh */
+                String filePath = rootFolger + File.separator + uploadDir + File.separator + newFile;
+
+                //tien hanh xu ly luu file vao thu muc
+                File destinationFile = new File(filePath);
+
+                //mkdir: kiem tra coi co ton tai folder ten la uploads chua anh khong neu khong mkdir no tao lai
+                destinationFile.getParentFile().mkdirs();
+
+                //tien hanh lay ruot anh(anh goc) ghi nhan va luu img vao folder uploads
+                try{
+                    //transferTo: giup ghi nhan va lay img(ruot anh)
+                    file.transferTo(destinationFile);
+                }catch (IOException e){
+                    e.printStackTrace();
+                }
+
+                /*qui trinh 2: tien hanh xoa img cu di*/
+                Path delFilePath = Path.of(rootFolger + File.separator + uploadDir + File.separator + entityEdit.getAvatar());
+                try{
+                    //tien hanh delete file img da ton tai(img cu)
+                    Files.deleteIfExists((delFilePath));
+                }catch(IOException ex){
+                    ex.printStackTrace();
+                }
+
+                /*qui trinh 3: tien hanh cap nhat csdl*/
+                entityEdit.setAvatar(newFile);
+             }
+
             if(objEdit.getPhone() != null && !objEdit.getPhone().isEmpty()){
                 entityEdit.setPhone(objEdit.getPhone());
             }
@@ -295,7 +343,7 @@ public class UserService {
                 e.printStackTrace();
             }
 
-            //nho repository xoa
+            //nho repository xoa dat r
             userRepo.delete((delEntity));
 
             //tra ve ket qua nguioi dung chuan restfull api
