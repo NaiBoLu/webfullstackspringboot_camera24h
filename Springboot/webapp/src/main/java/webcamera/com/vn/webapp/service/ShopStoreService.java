@@ -3,6 +3,7 @@ package webcamera.com.vn.webapp.service;
 import jakarta.validation.ConstraintViolationException;
 import jdk.jshell.Snippet;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -10,12 +11,20 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import webcamera.com.vn.webapp.DTO.ShopStoreDTO.ShopStoreCreateRequestDTO;
 import webcamera.com.vn.webapp.DTO.ShopStoreDTO.ShopStoreUpdateRequestDTO;
 import webcamera.com.vn.webapp.entity.ShopStore;
 import webcamera.com.vn.webapp.entity.User;
 import webcamera.com.vn.webapp.repository.ShopStoreRepository;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -26,6 +35,14 @@ public class ShopStoreService {
     // thêm thủ kho repo vào để phân trang và crud dữ liệu
     @Autowired
     private ShopStoreRepository shopStoreRepo;
+
+    /*tao bien string lay url cau hinh luu file da thiet lap ben application.properties
+     * @Value: annotation dc su dung de gan gia tri cho mot bien tu cac nguon:
+     *  + application.properties/application.yaml
+     *  ....
+     * */
+    @Value("${file.upload-dir}")
+    private String uploadDir;
 
     /*I - GET ->lay va do du lieu co phan trang*/
     public ResponseEntity<Map<String, Object>> getAllShopStorePagination(int pageNumber, int pageSize, String sortby){
@@ -69,9 +86,44 @@ public class ShopStoreService {
     }
 
     /*II - Post(create) tạo thêm 1 shopstores mới*/
-    public ResponseEntity<Map<String, Object>> createShopStore(ShopStoreCreateRequestDTO objCreate) {
+    public ResponseEntity<Map<String, Object>> createShopStore(ShopStoreCreateRequestDTO objCreate, MultipartFile file) {
         //a - khoi tao bien response de luu tru ket qua tra ve
         Map<String, Object> response = new HashMap<>();
+
+        /*******xu ly luu ruot img khi create Use******/
+        //tao chuoi randomString  rong ->
+        String randomString="";
+
+        //su dung datetime luu thong tin anh tranh trung ten va thoi gian luu anh
+        DateTimeFormatter iso_8601_formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
+        randomString = LocalDateTime.now().format(iso_8601_formatter);
+
+        /*thiet lap file path lay dung ten goc o dia luu folder trong project
+         * => thg thiet lap file chi dinh url lay: D:\\DOWNLOAD\\img\\....
+         * <=> tuy nhien, ntn vd may windown url  D:\\DOWNLOAD\\img\\.... nhung o may mac  D:/DOWNLOAD/img/....
+         * nhu vay neu thiet lap code nay o tren may windown thi qua may mac doan code rootFolder nay khong sai
+         * nhung ma khac he dieu hanh thi no khong hieu.. viet code nt la viet code co dinh viet code ngu
+         * ==-=> lib java.nio.file.Paths;
+         * */
+        String rootFolder = Paths.get("").toAbsolutePath().toString();
+
+
+        /*tao duong dan xu ly luu file
+         *  + file.getOriginalFilename(); method xu ly ghi nhan lay cai file ruot anh va tien hanh ghi nhan va luu vao trong folder uploads
+         *  + file.separator: co nhiem vu chinh la dung de chi dau phan cach thu muc: // cua windown, hay dau \ cua mac
+         *  + uploadDir: chinh la ten file lien ket voi cau hinh properties ben file application.properties ban nay
+         * */
+
+        String newFile = randomString + "_" + file.getOriginalFilename();
+        String filePath = rootFolder + File.separator + uploadDir + File.separator + newFile;
+
+
+        //tien hanh xu ly luu file vao thu muc uploads. Đây là hành động lấy ra một chiếc phong bì mới tinh và viết Địa chỉ Nhà (filePath)
+        // lên đó. Chiếc phong bì này chưa chứa bức thư hay ảnh đâu nhé, nó chỉ là tấm bìa ghi địa chỉ thôi!
+        File destinationFile = new File(filePath);
+
+        //mkdirs():kiem tra thu muc upload cho de chua anh co ton tai ko neu ko thi tạo
+        destinationFile.getParentFile().mkdirs();
 
         //c-1 khoi tao ShopStoreEntity truyền requestDTO vào
         ShopStore newEntity = new ShopStore();
@@ -79,7 +131,7 @@ public class ShopStoreService {
         newEntity.setStoreCode(objCreate.getStoreCode());
         newEntity.setStoreName(objCreate.getStoreName());
         newEntity.setDescription(objCreate.getDescription());
-        newEntity.setImage(objCreate.getImage());
+        newEntity.setImage(newFile);
 
         // c-2 yeu cau repository luu lai khoi tao tren
         // thuc hien nhan ten dk username va tien hanh kiem tra tranh trung ten username khi dang ky
@@ -92,6 +144,13 @@ public class ShopStoreService {
         }else{
             ShopStore createEntity = shopStoreRepo.save(newEntity);
 
+            //tien hanh lay ruot anh(anh goc, kich co anh(nhieu mb...)) ghi nhan va luu vao file
+            try{
+                file.transferTo(destinationFile);
+            }catch(IOException e){
+                e.printStackTrace();
+            }
+
             //c-4 tra ve ket qua cho nguoi dung theo chuan restfullAPI
             response.put("data", createEntity);
             response.put("statuscode", 200);
@@ -102,7 +161,7 @@ public class ShopStoreService {
     }
 
     /*III - Put(Update0*/
-    public ResponseEntity<Map<String, Object>> updateShopStore(Integer id, ShopStoreUpdateRequestDTO objEdit){
+    public ResponseEntity<Map<String, Object>> updateShopStore(Integer id, ShopStoreUpdateRequestDTO objEdit, MultipartFile file){
         // khoi tao bien response luu tru ket qua tra ve
         Map<String, Object> response = new HashMap<>();
 
@@ -124,8 +183,46 @@ public class ShopStoreService {
             if(objEdit.getDescription() != null && !objEdit.getDescription().isEmpty()){
                 entityEdit.setDescription(objEdit.getDescription());
             }
-            if(objEdit.getImage() != null && !objEdit.getImage().isEmpty()){
-                entityEdit.setImage(objEdit.getImage());
+            if(file != null){
+                /*qui trinh 1- update file moi(khoi create file img moi) vao thu muc mong doi*/
+                //tao chuoi randomString rong de luu gia tri bien moi vao
+                String randomString = "";
+                //tien hanh luu ten img voi dang tenanh_datetime
+                DateTimeFormatter iso_fommater = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
+                randomString = LocalDateTime.now().format(iso_fommater);
+
+                //tạo muc lay folder goc chua anh
+                String rootFolder = Paths.get("").toAbsolutePath().toString();
+
+                //tạo tên file ảnh mới gửi lên cập nhật
+                String newFile = randomString + "_" + file.getOriginalFilename();
+
+                //tao đường dẫn tuyệt đối từ thư mục gốc tới chỗ lưu ảnh mới
+                String filePath = rootFolder + File.separator + uploadDir + File.separator + newFile;
+
+                //tiến hành tạo lá thư File bỏ đường dẫn hình vào thư mục
+                File destinationFile = new File(filePath);
+
+                //mkdirs: kiem tra coi co ton tai folder upload chưa nếu chưa có thì tạo ra chỗ chứa ảnh
+                destinationFile.getParentFile().mkdirs();
+
+                //tiêns hành lưu file bằng transferTo kiểm tra try catch nếu file có lỗi
+                try{
+                    file.transferTo(destinationFile);
+                }catch(IOException e){
+                    e.printStackTrace();
+                }
+
+                /*qui trinh 2: tien hanh xoa img cu di*/
+                Path delFilePath = Path.of(rootFolder + File.separator + uploadDir + File.separator + entityEdit.getImage());
+                try{
+                    Files.deleteIfExists(delFilePath);
+                }catch(IOException e){
+                    e.printStackTrace();
+                }
+
+                /*qui trinh 3: tien hanh cap nhat csdl*/
+                entityEdit.setImage(newFile);
             }
 
             //nho repo luu lại
@@ -166,8 +263,19 @@ public class ShopStoreService {
             //neu ton tai id can tim thi lay no ra khỏi hộp -> ghi nhan no vao entity
             ShopStore delEntity = optFound.get();
 
+            /*xu ly tien hanh xoa ruot anh ung voi id cua anh do*/
+            String rootFolder = Paths.get("").toAbsolutePath().toString();
+            Path filePath = Path.of(rootFolder + File.separator + uploadDir + File.separator + delEntity.getImage());
+
             //gọi repo thủ kho xóa
             shopStoreRepo.delete(delEntity);
+
+            try{
+                // tiến hành xóa file đã tồn tại
+                Files.deleteIfExists(filePath);
+            }catch(IOException e){
+                e.printStackTrace();
+            }
 
             //tra ve ket qua nguioi dung chuan restfull api
             response.put("data",null);

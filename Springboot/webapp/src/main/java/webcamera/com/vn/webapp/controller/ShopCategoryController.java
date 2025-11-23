@@ -1,10 +1,16 @@
 package webcamera.com.vn.webapp.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.io.JsonEOFException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.core.util.Json;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import webcamera.com.vn.webapp.DTO.ShopCategoryDTO.ShopCategoryCreateRequestDTO;
+import webcamera.com.vn.webapp.DTO.ShopCategoryDTO.ShopCategoryUpdateRequestDTO;
 import webcamera.com.vn.webapp.service.ShopCategoryService;
 
 import java.util.HashMap;
@@ -26,21 +32,43 @@ public class ShopCategoryController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Map<String, Object>> create(@RequestBody ShopCategoryCreateRequestDTO res){
+    public ResponseEntity<Map<String, Object>> create(@RequestParam("file")MultipartFile file,
+                                                      @RequestParam("data") String jsonData){
         //khoi tao bien luu response de trả về thông báo lỗi
+        ObjectMapper objMapper = new ObjectMapper();
+        // tao dto rong
+        ShopCategoryCreateRequestDTO optDTO = null;
+
         try{
-            //goi den service luu csdl tu dto(gui len tu client thong qua create form dang ky user)
-            return shopCategoryService.createShopCategory(res);
+            //goi den service luu csdl tu dto(gui len tu client thong qua create form dang ky user
+            optDTO = objMapper.readValue(jsonData, ShopCategoryCreateRequestDTO.class);
+
         }catch(Exception e){
-            //khoi tao bien luu response de trả về thông báo lỗi
-            Map<String, Object> response = new HashMap<>();
-
-            response.put("data", e.getMessage());
-            response.put("statuscode",501);
-            response.put("msg","du lieu co loi vui long kiem tra lai");
-
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            e.printStackTrace();
         }
+
+        return shopCategoryService.createShopCategory(optDTO, file);
+
+    }
+
+    // update
+    @PutMapping("/update/{id}")
+    public ResponseEntity<Map<String, Object>> update(@PathVariable Integer id,
+                                                      @RequestParam(value = "file", required = false ) MultipartFile file,
+                                                      @RequestParam("data") String jsonData){
+        // tao object mapper
+        ObjectMapper objMapper = new ObjectMapper();
+
+        //tao dto update rong de truyen jsondata
+        ShopCategoryUpdateRequestDTO objDTO = null;
+
+        try{
+            objDTO = objMapper.readValue(jsonData , ShopCategoryUpdateRequestDTO.class);
+        }catch(JsonProcessingException ex){
+            ex.printStackTrace();
+        }
+
+        return shopCategoryService.updateShopCateogyr(id, objDTO, file);
     }
 
 
@@ -49,5 +77,9 @@ public class ShopCategoryController {
      * tham so cua method controler nay,
      *  -> day la cach ma g ia tri cua id trong dg dan path dc truyen den tham so id cua mehotd delete
      * */
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Map<String, Object>> delete(@PathVariable Integer id){
+        return shopCategoryService.delteShopcategory(id);
+    }
 
 }

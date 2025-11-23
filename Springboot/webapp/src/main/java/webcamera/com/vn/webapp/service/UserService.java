@@ -120,11 +120,12 @@ public class UserService {
         String newFile = randomString + "_" + file.getOriginalFilename();
         String filePath = rootFolder + File.separator + uploadDir + File.separator + newFile;
 
-        //tien hanh xu ly luu file vao thu muc uploads
+        //tien hanh xu ly luu file vao thu muc uploads. Đây là hành động lấy ra một chiếc phong bì mới tinh và viết Địa chỉ Nhà (filePath)
+        // lên đó. Chiếc phong bì này chưa chứa bức thư hay ảnh đâu nhé, nó chỉ là tấm bìa ghi địa chỉ thôi!
         File destinationFile = new File(filePath);
 
         /*tien hanh tao folder uploads trong projects neu no khong ton tai*/
-        destinationFile.getParentFile().mkdir();
+        destinationFile.getParentFile().mkdirs();
 
         //tien hanh lay ruot anh(anh goc, kich co anh(nhieu mb...)) ghi nhan va luu vao file
         try{

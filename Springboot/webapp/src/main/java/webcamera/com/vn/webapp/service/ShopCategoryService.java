@@ -2,6 +2,7 @@ package webcamera.com.vn.webapp.service;
 
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -10,11 +11,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import webcamera.com.vn.webapp.DTO.ShopCategoryDTO.ShopCategoryCreateRequestDTO;
 import webcamera.com.vn.webapp.DTO.ShopCategoryDTO.ShopCategoryUpdateRequestDTO;
 import webcamera.com.vn.webapp.entity.ShopCategory;
 import webcamera.com.vn.webapp.repository.ShopCategoryRepository;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -24,6 +33,10 @@ public class ShopCategoryService {
     //@Autowired gọi thủ kho repo vô để sử dụng
     @Autowired
     private ShopCategoryRepository shopCategoryRepo;
+
+    //cau hinh file upload image
+    @Value("${file.upload-dir}")
+    private String uploadDir;
 
     /*I - GET ->lay va do du lieu co phan trang*/
     public ResponseEntity<Map<String, Object>> getAllShopCategory(int pageNumber, int pageSize, String sortby){
@@ -71,10 +84,39 @@ public class ShopCategoryService {
 
 
     /*II - Post(create)*/
-    public ResponseEntity<Map<String, Object>> createShopCategory(ShopCategoryCreateRequestDTO objCreate) {
+    public ResponseEntity<Map<String, Object>> createShopCategory(ShopCategoryCreateRequestDTO objCreate, MultipartFile file) {
         //a - khoi tao bien response de luu tru ket qua tra ve
         //a - khoi tao bien response de luu tru ket qua tra ve
         Map<String, Object> response = new HashMap<>();
+
+
+        /*******xu ly luu ruot img khi create Use******/
+        //tao chuoi randomString  rong ->
+        String randomString = "";
+
+        //su dung datetime tranh trung ten file
+        DateTimeFormatter iso_8601_formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
+        randomString = LocalDateTime.now().format(iso_8601_formatter);
+        /*thiet lap file path lay dung ten goc o dia luu folder trong project
+         * => thg thiet lap file chi dinh url lay: D:\\DOWNLOAD\\img\\....
+         * <=> tuy nhien, ntn vd may windown url  D:\\DOWNLOAD\\img\\.... nhung o may mac  D:/DOWNLOAD/img/....
+         * nhu vay neu thiet lap code nay o tren may windown thi qua may mac doan code rootFolder nay khong sai
+         * nhung ma khac he dieu hanh thi no khong hieu.. viet code nt la viet code co dinh viet code ngu
+         * ==-=> lib java.nio.file.Paths;
+         * */
+        String rootFolder = Paths.get("").toAbsolutePath().toString();
+
+
+        //tao ten file tranh trung
+        String newFile = randomString + file.getOriginalFilename();
+        // tạo đường dẫn tuyệt đối cho image
+        String filePath = rootFolder + File.separator + uploadDir + File.separator + newFile;
+
+        //bỏ đường dẫn tuyệt đối vừa tạo vào obj phong bì FIle nó chỉ là tấm bìa ghi địa chỉ thôi!
+        File destinationFile = new File(filePath);
+
+        //mkdirs():kiem tra thu muc upload cho de chua anh co ton tai ko neu ko thi tạo
+        destinationFile.getParentFile().mkdirs();
 
         //c-1 khoi tao shopcategoryEntity để truyền createDTO vào
         ShopCategory newEntity = new ShopCategory();
@@ -82,7 +124,7 @@ public class ShopCategoryService {
         newEntity.setCategoryCode(objCreate.getCategoryCode());
         newEntity.setCategoryName(objCreate.getCategoryName());
         newEntity.setDescription(objCreate.getDescription());
-        newEntity.setImage(objCreate.getImage());
+        newEntity.setImage(newFile);
 
         // c-2 yeu cau repository luu lai khoi tao tren
         // thuc hien nhan ten dk username va tien hanh kiem tra tranh trung ten username khi dang ky
@@ -93,6 +135,13 @@ public class ShopCategoryService {
             throw new ConstraintViolationException("ten ban dung da ton tai vui long dat ten khac",null);
         }else{
             ShopCategory createEntity = shopCategoryRepo.save(newEntity);
+
+            //tien hanh lay ruot anh luu phong bì lúc nãy vàothuw mục
+            try{
+                file.transferTo(destinationFile);
+            }catch(IOException ex){
+                ex.printStackTrace();
+            }
 
             //c-4 tra ve ket qua cho nguoi dung theo chuan restfullAPI
             response.put("data", createEntity);
@@ -105,9 +154,87 @@ public class ShopCategoryService {
     }
 
 //    /*III - Put(Update0*/
-//    public ResponseEntity<Map<String, Object>> updateShopCateogyr(Integer id, ShopCategoryUpdateRequestDTO objEdit){
-//        //khoi tao
-//    }
+    public ResponseEntity<Map<String, Object>> updateShopCateogyr(Integer id, ShopCategoryUpdateRequestDTO objEdit, MultipartFile file){
+        //khoi tao response luu thong tin tra ve
+        Map<String, Object> response = new HashMap<>();
+
+        //nho repo tim kiem entity dua tren id muon update
+        Optional<ShopCategory> optFound = shopCategoryRepo.findById(id);
+
+        //kiem tra va cap nhat cac truong tt null hoac empty -> tien hanh bo qua va ghi nhan
+        if(optFound.isPresent()){
+            //lay entity vua tim kiem dc ra khoi hop qua optional
+            ShopCategory entityEdit = optFound.get();
+
+            //kiem tra va cap nhat cac truong tt null hoac empty thi bo qua ghi nhan cac truong khac null va empty
+            if(objEdit.getCategoryCode() != null && !objEdit.getCategoryCode().isEmpty()){
+                entityEdit.setCategoryCode(objEdit.getCategoryCode());
+            }
+            if(objEdit.getCategoryName() != null && !objEdit.getCategoryName().isEmpty()){
+                entityEdit.setCategoryName(objEdit.getCategoryName());
+            }
+            if(objEdit.getDescription() != null && !objEdit.getDescription().isEmpty()){
+                entityEdit.setDescription(objEdit.getDescription());
+            }
+            if(file != null){
+                /*qui trinh 1- update file moi(khoi create file img moi) vao thu muc mong doi*/
+                //tao chuoi randomString rong de luu gia tri bien moi vao
+                String random = "";
+                //tien hanh luu ten img voi dang tenanh_datetime
+                DateTimeFormatter iso_8601_formatter = DateTimeFormatter.ofPattern("yyyMMdd_HHmmss");
+                random = LocalDateTime.now().format(iso_8601_formatter);
+                //tao thu muc goc chua anh
+                String rootFolder = Paths.get("").toAbsolutePath().toString();
+
+                //taoj ten file anhr moi gui len cap nhat
+                String newFile = random + file.getOriginalFilename();
+
+                //tao duong dan tuyet doi tu thu muc goc den file chua anh
+                String filePath = rootFolder + File.separator + uploadDir + File.separator + newFile;
+
+                //tạo lá thu File bỏ đường dẫn hình vào thư mục
+                File destinationFile = new File(filePath);
+
+                //mkdirs(): kiem tra co ton tai thu muc chua anh chua neu chua thi tạo thu muc
+                destinationFile.getParentFile().mkdirs();
+
+                //tién hành luu file bang transferTo
+                try{
+                    file.transferTo(destinationFile);
+                }catch(IOException ex){
+                    ex.printStackTrace();
+                }
+
+                /*qui trinh 2: tien hanh xoa img cu di*/
+                Path delFilePath = Path.of(rootFolder + File.separator + uploadDir + File.separator + entityEdit.getImage());
+                try{
+                    Files.deleteIfExists(delFilePath);
+                }catch (IOException ex){
+                    ex.printStackTrace();
+                }
+
+                /*qui trinh 3: tien hanh cap nhat csdl*/
+                entityEdit.setImage(newFile);
+            }
+
+            // nho repo luu lai cap nhat vao database
+            shopCategoryRepo.save(entityEdit);
+
+            //tra ve thong bao chuan restful api
+            response.put("data",entityEdit);
+            response.put("statuscode", 200);
+            response.put("msg", "update thanh cong lmao");
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }else{
+            response.put("data", null);
+            response.put("statuscode",404);
+            response.put("msg","update khong thanh cong ko tim thay id");
+
+            return new ResponseEntity<>(response,  HttpStatus.INTERNAL_SERVER_ERROR);
+
+        }
+    }
 
     /*IV- Delete(xoa)*/
     public ResponseEntity<Map<String, Object>> delteShopcategory(Integer id){
@@ -127,8 +254,19 @@ public class ShopCategoryService {
             //neu ton tai id can tim thi lay no ra khỏi hộp -> ghi nhan no vao entity
             ShopCategory delEntity = optFound.get();
 
+            /*xu ly tien hanh xoa ruot anh ung voi id cua anh do*/
+            String rootFolder = Paths.get("").toAbsolutePath().toString();
+            Path filePath = Path.of(rootFolder + File.separator + uploadDir + File.separator + delEntity.getImage());
+
             //goi thu kho repo xoa no
             shopCategoryRepo.delete(delEntity);
+
+            //xóa file đã tồn tại
+            try{
+                Files.deleteIfExists(filePath);
+            }catch(IOException ex){
+                ex.printStackTrace();
+            }
 
             //tra ve ket qua nguoi dung
             response.put("data",null);
