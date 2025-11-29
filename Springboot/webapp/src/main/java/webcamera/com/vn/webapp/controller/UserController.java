@@ -61,18 +61,6 @@ public class UserController {
         return userService.createUser(objDTO, file);
     }
 
-
-    /*
-    * @PathVariable: anotation dc su dung de trich xuat gia thong qua url  api va anh xa no toi
-    * tham so cua method controler nay,
-    *  -> day la cach ma g ia tri cua id trong dg dan path dc truyen den tham so id cua mehotd delete
-    * */
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Map<String, Object>> delete(@PathVariable Integer id){
-        return userService.deleteUsre(id);
-    }
-
-
     /*update - PUT*/
     @PutMapping("/update/{id}")
     public ResponseEntity<Map<String, Object>> update(@PathVariable Integer id,
@@ -93,5 +81,14 @@ public class UserController {
         return userService.updateUser(id, objDTO, file);
     }
 
+    /*
+     * @PathVariable: anotation dc su dung de trich xuat gia thong qua url  api va anh xa no toi
+     * tham so cua method controler nay,
+     *  -> day la cach ma g ia tri cua id trong dg dan path dc truyen den tham so id cua mehotd delete
+     * */
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Map<String, Object>> delete(@PathVariable Integer id){
+        return userService.deleteUsre(id);
+    }
 
 }

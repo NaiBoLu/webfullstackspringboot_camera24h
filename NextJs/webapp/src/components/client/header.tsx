@@ -19,7 +19,29 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {} from "@fortawesome/free-solid-svg-icons";
 
+//import lib modal va cac lib lien quan xu ly modal context cho form login
+import Modal from "react-bootstrap/Modal";
+import { useModal } from "@/contexts/ModalContext";
+//import pathName: hook cua next/navigation giup lay duong dan url hien tai
+import { usePathname } from "next/navigation";
+import { useEffect } from "react";
+
+//import page giao dien cuar MOdal.body cua form login
+import Login from "@/app/client/login/page";
+
 export default function Header() {
+  //khoi tao cac compoent cuar modal context da khai bao o class modalcontext
+  const { openModal, closeModal, show, modalType } = useModal();
+
+  /*useEffect: method xu ly hanh dong hide/show modal context sau khi giao dien dc 
+  render thanh cong
+  -> pathname giup khi dong form login thi route Link nos doi sang trang moi*/
+  const pathName = usePathname;
+  useEffect(() => {
+    //hide an form login khi bam dau x, button clode hay bam vung ngaoi form r
+    closeModal;
+  }, [pathName]);
+
   return (
     <>
       {/* Navbar React bootstrap */}
@@ -38,18 +60,21 @@ export default function Header() {
               <NavLink as={Link} href="/">
                 Trang chủ
               </NavLink>
-              <NavLink as={Link} href="/about">
+              <NavLink as={Link} href="/client/about">
                 Giới Thiệu
               </NavLink>
-              <NavLink as={Link} href="/contact">
+              <NavLink as={Link} href="/client/contact">
                 Liên Hệ
               </NavLink>
-              <NavLink as={Link} href="/product">
+              <NavLink as={Link} href="/client/products">
                 Sản Phẩm
               </NavLink>
-              <NavLink as={Link} href="/client/login">
-                Đăng Nhập
+
+              {/* xu ly handle event click button dawngnhap -> modal context form login */}
+              <NavLink as={Link} href="#">
+                <span onClick={() => openModal("loginForm")}>Đăng Nhập</span>
               </NavLink>
+
               <Dropdown
                 align="end"
                 className="border rounded text-white p-1"
@@ -74,6 +99,16 @@ export default function Header() {
           </NavbarCollapse>
         </Container>
       </Navbar>
+
+      {/* //  modals form login cua  react bootstrap */}
+      <Modal show={show && modalType == "loginForm"} onHide={closeModal}>
+        <Modal.Header>
+          <Modal.Title>Login Form</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Login />
+        </Modal.Body>
+      </Modal>
     </>
   );
 }

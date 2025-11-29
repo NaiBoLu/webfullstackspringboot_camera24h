@@ -3,7 +3,7 @@
   --foreground: #171717;
 }
 
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: light) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
@@ -46,4 +46,52 @@ a {
   html {
     color-scheme: dark;
   }
+}
+
+/* css custom nút tab */
+.custom-tabs .nav-link {
+  border: 1px solid #ccc !important;
+  border-radius: 30px !important;
+  min-width: 300px !important;
+  padding: 10px 30px !important;
+  margin-right: 20px;
+  background: #f3f3f3;
+  color: #333 !important;
+  font-weight: 600;
+  border: none;
+}
+
+.custom-tabs .nav-link.active {
+  background: #b3e4c9 !important;
+}
+
+.custom-tabs .nav-item.show .nav-link,
+.custom-tabs .nav-link.active {
+  border: none !important;
+}
+
+/* custom placeholder input email */
+/* Sử dụng pseudo-element ::placeholder */
+.custom-placeholder::placeholder {
+  color: #9d9ea2; /* Màu chữ gợi ý (giống trong hình ảnh coupon) */
+  opacity: 1; /* Đảm bảo chữ không bị mờ (vì một số trình duyệt mặc định mờ) */
+  font-style: italic; /* Ví dụ: Thêm style italic */
+}
+
+/* Các tiền tố trình duyệt cũ (thường không cần thiết cho các trình duyệt hiện đại) */
+.custom-placeholder::-webkit-input-placeholder {
+  color: #9d9ea2;
+}
+
+.custom-placeholder:-ms-input-placeholder {
+  color: #9d9ea2;
+}
+
+/* hiệu ứng hover nổi nhẹ */
+.card {
+  transition: all 0.3s ease;
+}
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); /* bóng mượt */
 }

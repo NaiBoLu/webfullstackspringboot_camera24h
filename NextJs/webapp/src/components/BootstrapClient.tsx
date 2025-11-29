@@ -1,7 +1,7 @@
 /* File nayf giups import lib boootstrap.min.js vào dự án nexts khắc phục tình trạng báo lỗi khi
 sử dụng lib js của bootstrap là window í not defined
  => file layout.tsx là một server component theo mặc định tỏng nextjs
- -> co de trong server component đc thực thi trên máy chủ là nodejs
+ -> code trong server component đc thực thi trên máy chủ là nodejs
  -> mà môi trường nodejs nó không có đối tượng document để khởi tạo các tính các tính năng tương 
  tác với eleement trong html
  ===> chính vì thế ta cần khai báo riêng  đẻ nextjs hiểu  và khởi tạo các tính năng của lib js của 
