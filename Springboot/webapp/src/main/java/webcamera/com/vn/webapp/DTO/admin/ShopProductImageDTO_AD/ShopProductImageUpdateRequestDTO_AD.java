@@ -1,0 +1,18 @@
+package webcamera.com.vn.webapp.DTO.admin.ShopProductImageDTO_AD;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class ShopProductImageUpdateRequestDTO_AD {
+    @NotNull(message = "id san pham ko duoc de trong")
+    private Integer productId;
+
+    @NotBlank(message = "hinh ko duoc de trong")
+    private String image;
+}
