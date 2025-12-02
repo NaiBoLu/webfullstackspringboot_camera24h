@@ -1,4 +1,4 @@
-package webcamera.com.vn.webapp.DTO.admin.UserDTO_AD;
+package webcamera.com.vn.webapp.DTO.client.UserDTO_CL;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -12,7 +12,7 @@ import org.hibernate.validator.constraints.Length;
 @NoArgsConstructor
 @Getter
 @Setter
-public class UserUpdateRequestDTO_AD {
+public class UserCreateRequestDTO_CL {
     @NotBlank(message = "khogn dc de username trong")
     @Length(min = 3, max = 70, message = "ten username phai co it nhat la 3 ky tu")
     private String username;

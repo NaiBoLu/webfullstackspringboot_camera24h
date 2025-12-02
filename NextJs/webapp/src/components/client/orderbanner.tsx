@@ -8,7 +8,7 @@ export default function OrderBanner() {
     >
       <div
         className="position-absolute top-0 start-0 w-100 h-100 rounded-4 py-4"
-        style={{ background: "#05422c" }}
+        style={{ background: "linear-gradient(to right, #0a3d0a, #3c8d3c)" }}
       >
         <div className="ms-5 w-75">
           <h1
@@ -27,7 +27,7 @@ export default function OrderBanner() {
         <div className="d-flex custom-input-group  w-75 ms-5">
           {/* 1. Ô Input (Phần lớn) */}
           <Form.Control
-            style={{ backgroundColor: "#05422c", color: "white" }}
+            style={{ backgroundColor: "transparent", color: "white" }}
             type="email"
             placeholder="Email Address"
             className=" me-0 flex-grow-1 rounded-pill text-white border-1 fs-5 custom-placeholder" // me-0 để loại bỏ margin mặc định nếu có

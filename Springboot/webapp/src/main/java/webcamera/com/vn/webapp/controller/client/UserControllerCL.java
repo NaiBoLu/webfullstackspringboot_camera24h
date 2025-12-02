@@ -1,4 +1,4 @@
-package webcamera.com.vn.webapp.controller.admin;
+package webcamera.com.vn.webapp.controller.client;
 /*trung tam dieu phoi hoat dong cua mo hinh 3 lop*/
 
 
@@ -8,19 +8,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import webcamera.com.vn.webapp.DTO.admin.UserDTO_AD.UserCreateRequestDTO_AD;
-import webcamera.com.vn.webapp.DTO.admin.UserDTO_AD.UserUpdateRequestDTO_AD;
-import webcamera.com.vn.webapp.service.admin.UserServiceAD;
+import webcamera.com.vn.webapp.DTO.client.UserDTO_CL.UserCreateRequestDTO_CL;
+import webcamera.com.vn.webapp.DTO.client.UserDTO_CL.UserUpdateRequestDTO_CL;
+import webcamera.com.vn.webapp.service.client.UserServiceCL;
 
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/admin/users")
-public class UserControllerAD {
+@RequestMapping("/api/client/users")
+public class UserControllerCL {
 
     //goi khoi tao lop services trong controller cua user
     @Autowired
-    private UserServiceAD userService;
+    private UserServiceCL userService;
 
     /*I - render GET*/
     @GetMapping
@@ -45,11 +45,11 @@ public class UserControllerAD {
         ObjectMapper objectMapper = new ObjectMapper();
 
         //goi khoi tao lop dto cua user
-        UserCreateRequestDTO_AD objDTO = null;
+        UserCreateRequestDTO_CL objDTO = null;
 
         //tien hanh cho DTO doc va ghi nhan value tu json gui len da dc map thog qua lop OjectMapper
         try{
-            objDTO = objectMapper.readValue(jsonData, UserCreateRequestDTO_AD.class);
+            objDTO = objectMapper.readValue(jsonData, UserCreateRequestDTO_CL.class);
         }catch(Exception ex){
             ex.printStackTrace();
         }
@@ -66,11 +66,11 @@ public class UserControllerAD {
         ObjectMapper objectMapper = new ObjectMapper();
 
         //khoi t ao lop dto update
-        UserUpdateRequestDTO_AD objDTO = null;
+        UserUpdateRequestDTO_CL objDTO = null;
 
         //tien hanh cho DTO doc va ghi nhan value json gui len da dc map thong qua lop ObjectMapper
         try{
-            objDTO = objectMapper.readValue(jsonData, UserUpdateRequestDTO_AD.class);
+            objDTO = objectMapper.readValue(jsonData, UserUpdateRequestDTO_CL.class);
         }catch(JsonProcessingException e){
             e.printStackTrace();
         }

@@ -45,7 +45,12 @@ export default function Header() {
   return (
     <>
       {/* Navbar React bootstrap */}
-      <Navbar expand="lg" variant="dark" style={{ backgroundColor: "#05422C" }}>
+      <Navbar
+        sticky="top"
+        expand="lg"
+        variant="dark"
+        style={{ backgroundColor: "#05422C" }}
+      >
         <Container>
           <NavbarBrand as={Link} href="/" className="fw-bold text-warning">
             👑 Royal Neko

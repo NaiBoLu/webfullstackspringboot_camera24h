@@ -1,4 +1,4 @@
-package webcamera.com.vn.webapp.service.admin;
+package webcamera.com.vn.webapp.service.client;
 
 
 import jakarta.validation.ConstraintViolationException;
@@ -12,8 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import webcamera.com.vn.webapp.DTO.admin.UserDTO_AD.UserCreateRequestDTO_AD;
-import webcamera.com.vn.webapp.DTO.admin.UserDTO_AD.UserUpdateRequestDTO_AD;
+import webcamera.com.vn.webapp.DTO.client.UserDTO_CL.UserCreateRequestDTO_CL;
+import webcamera.com.vn.webapp.DTO.client.UserDTO_CL.UserUpdateRequestDTO_CL;
 import webcamera.com.vn.webapp.entity.admin.UserAD;
 import webcamera.com.vn.webapp.exceptions.ValidationErrorResponse;
 import webcamera.com.vn.webapp.exceptions.Violations;
@@ -34,7 +34,7 @@ import java.util.regex.Pattern;
 /*lop luan ly logic code*/
 
 @Service
-public class UserServiceAD {
+public class UserServiceCL {
 
     @Autowired
     private webcamera.com.vn.webapp.repository.UserRepository userRepo;
@@ -90,7 +90,7 @@ public class UserServiceAD {
 
     /*II - Post(create)*/
     //MultipartFile: la mot interface trong spring, dc su dung de xu ly cac tep files -> dc upload thog qua giao thuc HTTP request
-    public ResponseEntity<Map<String, Object>> createUser(UserCreateRequestDTO_AD objCreate, MultipartFile file){
+    public ResponseEntity<Map<String, Object>> createUser(UserCreateRequestDTO_CL objCreate, MultipartFile file){
         //a - khoi tao bien response de luu tru ket qua tra ve
         Map<String, Object> response = new HashMap<>();
 
@@ -215,7 +215,7 @@ public class UserServiceAD {
 
 
     /*III - Put(Update0*/
-    public ResponseEntity<Map<String, Object>> updateUser(Integer id, UserUpdateRequestDTO_AD objEdit, MultipartFile file){
+    public ResponseEntity<Map<String, Object>> updateUser(Integer id, UserUpdateRequestDTO_CL objEdit, MultipartFile file){
         // khoi tao bien response luu tru ket qua tra ve
         Map<String, Object> response = new HashMap<>();
 

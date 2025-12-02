@@ -26,6 +26,7 @@ public class ShopExportControllerAD {
         return shopExportService.getAllShopExport(pageNumber,pageSize,sortby);
     }
 
+
     //create
     @PostMapping("/create")
     public ResponseEntity<Map<String, Object>> create(@Valid @RequestBody ShopExportCreateRequestDTO_AD objDTO){

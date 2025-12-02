@@ -16,6 +16,7 @@ config.autoAddCss = false;
 
 //import modal context dung cho global toan du an
 import { ModalProvider } from "@/contexts/ModalContext";
+import BackToTop from "@/components/client/BackToTop";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -41,6 +42,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <ModalProvider>{children}</ModalProvider>
+        <BackToTop></BackToTop>
       </body>
     </html>
   );

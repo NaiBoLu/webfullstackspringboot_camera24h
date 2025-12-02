@@ -23,6 +23,7 @@ import ChooseProduct from "@/components/client/chooseproduct";
 import Referfriendbanner from "@/components/client/referfriendbanner";
 import SwiperEducation from "@/components/client/swipereducation";
 import OrderBanner from "@/components/client/orderbanner";
+import BackToTop from "@/components/client/BackToTop";
 
 /* phan body cua homepage cuar client page layout */
 export default function HomePage() {
@@ -97,6 +98,8 @@ export default function HomePage() {
 
       {/* phan body khieu goi cua e: lol va hai cap vu */}
       <main className=" my-5 flex-grow-1 ">
+        {/* */}
+
         {/*phần reliable shipping */}
         <Container
           fluid
