@@ -1,4 +1,4 @@
-package webcamera.com.vn.webapp.entity.admin;
+package webcamera.com.vn.webapp.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -13,10 +13,13 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "users")
-public class UserAD {
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
+    @Column(name = "name")
+    private String name;
 
     @Column(name = "username")
     private String username;
@@ -24,16 +27,12 @@ public class UserAD {
     @Column(name = "password")
     private String password;
 
-    @Column(name = "lastname")
-    private String lastName;
-
-    @Column(name = "firstname")
-    private String firstName;
-
     @Column(name = "gender")
     private Long gender;
+
     @Column(name = "email")
     private String email;
+
     @Column(name = "birthday")
     private LocalDate birthday;
 
@@ -41,26 +40,24 @@ public class UserAD {
     @Column(name = "avatar")
     private String avatar;
 
-    @Column(name = "code")
-    private String code;
-    @Column(name = "job_title")
-    private String jobTitle;
-    @Column(name = "department")
-    private String department;
+    @Column(name = "level_id")
+    private int levelId;
+
     @Column(name = "phone")
     private String phone;
+
     @Column(name = "address")
     private String address;
-    @Column(name = "city")
-    private String city;
-    @Column(name = "postal_code")
-    private String postalCode;
+
     @Column(name = "country")
     private String country;
+
     @Column(name = "remember_token")
     private String rememberToken;
-    @Column(name = "status")
-    private Long status;
+
+    @Column(name = "is_active")
+    private Long isActive;
+
     @Column(name = "create_at")
     private LocalDateTime create_at;
     @Column(name = "updated_at")

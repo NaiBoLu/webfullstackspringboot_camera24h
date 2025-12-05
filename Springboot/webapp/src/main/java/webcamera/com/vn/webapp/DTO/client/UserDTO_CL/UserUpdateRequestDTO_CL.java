@@ -33,6 +33,9 @@ public class UserUpdateRequestDTO_CL {
     @Email(message = "phai dung cau truc email la <name@gmail.com>")
     private String email;
 
+    @NotBlank(message = "khong dc de trong muc luong")
+    private int levelId;
+
     @Pattern(message = "phai dung cau truc sdt; xxxx-xxx-xxx", regexp = "^\\d{4}\\d{3}\\d{3}$")
     private String phone;
 
@@ -41,5 +44,5 @@ public class UserUpdateRequestDTO_CL {
     private String address;
 
     @NotNull(message = "khong dc de trong")
-    private Long status;
+    private Long isActive;
 }

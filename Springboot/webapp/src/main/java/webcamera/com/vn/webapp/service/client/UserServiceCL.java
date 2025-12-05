@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import webcamera.com.vn.webapp.DTO.client.UserDTO_CL.UserCreateRequestDTO_CL;
 import webcamera.com.vn.webapp.DTO.client.UserDTO_CL.UserUpdateRequestDTO_CL;
-import webcamera.com.vn.webapp.entity.admin.UserAD;
+import webcamera.com.vn.webapp.entity.User;
 import webcamera.com.vn.webapp.exceptions.ValidationErrorResponse;
 import webcamera.com.vn.webapp.exceptions.Violations;
 
@@ -61,7 +61,7 @@ public class UserServiceCL {
         *  + sortBy: sap xep trang cot nao: id or theo ten name...
         * */
         Pageable pageable = PageRequest.of(pageNumber-1, pageSize, Sort.by(sortby));
-        Page<UserAD> pageResult = userRepo.findAll(pageable);
+        Page<User> pageResult = userRepo.findAll(pageable);
         if(pageResult.hasContent()){
             //tra ket qua cho nguoi dung -> tra theo chuan restfull APi sieu cap vip pro
             response.put("data", pageResult.getContent());
@@ -169,30 +169,32 @@ public class UserServiceCL {
         //c - kiem tra neu nguoi dung khong vi pham bat ke service validation nao thi cho luu
         if(responseError.getViolations().size() == 0){
             //c-1 khoi tao UserEntity
-            UserAD newEntity = new UserAD();
+            User newEntity = new User();
+            newEntity.setName(objCreate.getName());
             newEntity.setUsername(objCreate.getUsername());
             newEntity.setPassword(objCreate.getPassword());
-            newEntity.setLastName(objCreate.getLastName());
-            newEntity.setFirstName(objCreate.getFirstName());
             newEntity.setEmail(objCreate.getEmail());
 
             //xu ly goi repo luu img co ruot
             newEntity.setAvatar(newFile);
 
+            //lk khoa ngoai cua table salary_level
+            newEntity.setLevelId(objCreate.getLevelId());
+
             newEntity.setPhone(objCreate.getPhone());
-            newEntity.setStatus((long)1);//set mac dinh avatar mac dinh
+            newEntity.setIsActive((long)1);//set mac dinh avatar mac dinh
 
            // c-2 yeu cau repository luu lai khoi tao tren
             // thuc hien
             // nhan ten dk username va tien hanh kiem tra tranh trung ten username khi dang ky
-           UserAD existingUser = userRepo.findByUsername(objCreate.getUsername());
+           User existingUser = userRepo.findByUsername(objCreate.getUsername());
 
            // c-3 thuc hien kiem tra ds data trong mysql co trung ten username nao khong
             if(existingUser != null){
                 //nem loi thong bao de khong cho phep tao trung ten
                 throw new ConstraintViolationException("Ten ban dang ky da ton tai vui long chon ten khac hahaaha", null);
             }else{
-                UserAD createEntity = userRepo.save(newEntity);
+                User createEntity = userRepo.save(newEntity);
 
                 //c-4 tra ve ket qua cho nguoi dung theo chuan restfullAPI
                 response.put("data", createEntity);
@@ -220,20 +222,14 @@ public class UserServiceCL {
         Map<String, Object> response = new HashMap<>();
 
         // nho repo tim kiem entity(dua tren id) ma muon update
-        Optional<UserAD> optFound = userRepo.findById(id);
+        Optional<User> optFound = userRepo.findById(id);
         if(optFound.isPresent()){
             //nhan dc id vua tim kiem va gan vao entity cua uder de doi chung
-            UserAD entityEdit = optFound.get();
+            User entityEdit = optFound.get();
 
             //kiem tra va cap nha cac truong tt null hoawc empty -> tien hanh bo qua va ghi nhan
             if(objEdit.getPassword() != null && !objEdit.getPassword().isEmpty()){
                 entityEdit.setPassword(objEdit.getPassword());
-            }
-            if(objEdit.getLastName() != null && !objEdit.getLastName().isBlank()){
-                entityEdit.setLastName(objEdit.getLastName());
-            }
-            if(objEdit.getFirstName() != null && !objEdit.getFirstName().isEmpty()){
-                entityEdit.setFirstName(objEdit.getFirstName());
             }
             if(objEdit.getEmail() != null && !objEdit.getEmail().isEmpty()){
                 entityEdit.setEmail(objEdit.getEmail());
@@ -291,8 +287,8 @@ public class UserServiceCL {
             if(objEdit.getAddress() != null && !objEdit.getAddress().isEmpty()){
                 entityEdit.setAddress(objEdit.getAddress());
             }
-            if(objEdit.getStatus() != null){
-                entityEdit.setStatus(objEdit.getStatus());
+            if(objEdit.getIsActive() != null){
+                entityEdit.setIsActive(objEdit.getIsActive());
             }
 
             //nhow repository update
@@ -327,10 +323,10 @@ public class UserServiceCL {
         *  + muc tieu chinh Optional la giup iam thieu loi NullPointerException khi ma minhf
         * xu ly voi cac gia tri null
         * */
-        Optional<UserAD> optFound = userRepo.findById(id);
+        Optional<User> optFound = userRepo.findById(id);
         if(optFound.isPresent()){
             //neu ton tai id can tim thi lay no ra -> ghi nhan no vao entity
-            UserAD delEntity = optFound.get();
+            User delEntity = optFound.get();
 
             /*xu ly tien hanh xoa ruot anh ung voi taikhoan cua anh do*/
             String rootFolder = Paths.get("").toAbsolutePath().toString();

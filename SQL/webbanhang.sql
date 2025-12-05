@@ -1,40 +1,34 @@
 -- dự án csdl cho web ban hàng của lmao... nhằm cua gái đẹp vú to
 
 -- 1/ câu lệnh tạo csdl 
-create database camera24h
+create database webapp_camera24h
 character set utf8mb4
 collate utf8mb4_unicode_ci;
 
 -- 2 usse database moi su dung dc
-use camera24h;
+use webapp_camera24h;
 
 -- 3 tien hanh tao table csdl 
 -- #1 table users
 create table users(
  -- unsigned la gia tri khong am, not null khong dc trong, auto_increment gia tri tu tang
  id int unsigned not null auto_increment primary key,
+ name varchar(200),
  username varchar(200) not null,
  password varchar(300) not null,
- lastname varchar(255) not null,
- firstname varchar(255) not null,
  gender tinyint(5),
  email varchar(200),
  birthday datetime,
  avatar mediumtext,
- code varchar(255),
- job_title varchar(250),
- department varchar(250),
+ level_id int unsigned not null,  -- FK cua bang salary_levels
  phone varchar(25),
  address varchar(500),
- city varchar(250),
- postal_code varchar(20),
  country varchar(250),
  remember_token varchar(250),
- status tinyint(4),
- create_at timestamp,
+ is_active varchar(50),
+ created_at timestamp,
  updated_at timestamp
 );
-
 
 -- # create table roles
 create table roles(
@@ -49,7 +43,8 @@ create table roles(
 -- $ create table permisions
 create table permisions(
  id int unsigned auto_increment not null primary key,
- display_name varchar(200),
+ name varchar(250),
+ display_name varchar(250),
  guard_name varchar(250),
  created_at timestamp,
  updated_at timestamp
@@ -69,28 +64,9 @@ create table role_has_permissions(
     permission_id int unsigned not null -- khoa ngoai
 );
 
--- 4/ crate table nhoms products
-create table  Shop_categories(
-	id int unsigned not null auto_increment primary key,
-    category_code varchar(50) not null,
-    category_name varchar(300) not null,
-    description text,
-    image text,
-    created_at timestamp,
-    updated_at timestamp
-);
 
-create table Shop_Suppliers(
-	id int unsigned not null auto_increment primary key,
-    supplier_code varchar(50) not null,
-    supplier_name varchar(300) not null,
-    description text,
-    image text,
-    created_at timestamp,
-    updated_at timestamp
-);
-
-create table Shop_products(
+-- create table products ok yeah yeah
+create table products(
   id int unsigned not null auto_increment primary key,
   product_code varchar(25) not null,
   product_name varchar(150) not null,
@@ -115,82 +91,100 @@ create table Shop_products(
   updated_at timestamp
 );
 
-create table Shop_product_images(
+-- crate table nhoms products
+create table categories(
 	id int unsigned not null auto_increment primary key,
-    product_id int unsigned not null,
-    images varchar(500)
-);
-
-create table Shop_stores (
-	id int unsigned auto_increment not null primary key,
-    store_name varchar(500),
+    category_code varchar(50) not null,
+    category_name varchar(300) not null,
     description text,
     image text,
     created_at timestamp,
     updated_at timestamp
 );
 
-create table Shop_exports (
-	id int unsigned auto_increment not null primary key,
-    store_id int unsigned not null,
-    employee_id int unsigned not null,
-    export_date datetime,
-    description text,
-    order_id int unsigned not null,
-    created_at timestamp,
-    updated_at timestamp
-);
-
-create table Shop_imports (
+create table suppliers(
 	id int unsigned not null auto_increment primary key,
-    store_id int unsigned not null,
-    employee_id int unsigned not null,
-    import_date datetime,
+    supplier_code varchar(50) not null,
+    supplier_name varchar(300) not null,
+    description text,
+    image text,
     created_at timestamp,
     updated_at timestamp
 );
 
-create table Shop_import_details (
-	id int unsigned auto_increment not null primary key,
-    import_id int unsigned not null,
+
+-- create product imgs
+create table product_images(
+	id int unsigned not null auto_increment primary key,
     product_id int unsigned not null,
-    quantity decimal(18,4),
-    unity_price decimal(19,4)
+    images varchar(500)
 );
 
-create table Shop_export_details (
-	id int unsigned auto_increment not null primary key,
-    export_id int unsigned not null,
-    product_id int unsigned not null,
-    quantity decimal(18,4),
-	unity_price decimal(19,4),
-    import_detail_id int unsigned not null
+-- create table salary levels: muc luog
+create table salary_levels(
+	id int unsigned not null auto_increment primary key,
+    name varchar(50),
+    hourly_wage float,
+    description varchar(500)
 );
+
+create table timesheets(
+	id int unsigned not null auto_increment primary key,
+	user_id int unsigned not null,
+    shift_id int unsigned  not null,
+    work_date datetime,
+    checkin datetime,
+    checkout datetime,
+    note text
+);
+
+CREATE TABLE shifts (
+   id int unsigned not null auto_increment primary key,
+    name VARCHAR(200),
+    start_time DATETIME,
+    end_time DATETIME,
+    wage_multiplier FLOAT,
+    bonus FLOAT
+);
+
+
 
 -- 5/ cachs viet code tao khoa ngoai cay cau khoa ngoai phai cung kieu du lieu voi khoa chinh ko am int
+
+ -- khoa ngoai cua bang user voi salary_levels
+ alter table users add constraint fk_user_salarylevel foreign key(level_id) references salary_levels(id);
+ 
  -- khoa ngoai cho bang user voi roles
  alter table user_has_roles add constraint fk_user_has_role1 foreign key(user_id) references users(id);
  alter table user_has_roles add constraint fk_user_has_role2 foreign key(role_id) references roles(id);
-
+ 
 
 -- khoa ngoai cho bang role voi permission
 alter table role_has_permissions add constraint fk_role_has_per1 foreign key(role_id) references roles(id);
 alter table role_has_permissions add constraint fk_role_has_per2 foreign key(permission_id) references permisions(id);
 
 -- nhom khoa ngoai cho nhom bang products
-alter table Shop_products add constraint fk_shop_product1 foreign key(category_id) references Shop_categories(id);
-alter table Shop_products add constraint fk_shop_product2 foreign key(supplier_id) references Shop_suppliers(id);
-alter table Shop_product_images add constraint fk_shop_product_imgs foreign key(product_id) references Shop_product_images(id);
+alter table products add constraint fk_product1 foreign key(category_id) references categories(id);
+alter table products add constraint fk_product2 foreign key(supplier_id) references suppliers(id);
+alter table product_images add constraint fk_product_imgs foreign key(product_id) references product_images(id);
 
--- nhom khoa ngoai cho nhom quan ly xuat nhạp kho
-alter table Shop_imports add constraint fk_shopimport1 foreign key(store_id) references Shop_stores(id);
-alter table Shop_imports add constraint fk_shopimport2 foreign key(employee_id) references users(id);
 
-alter table Shop_exports add constraint fk_shopexport1 foreign key(store_id) references Shop_stores(id);
-alter table Shop_exports add constraint fk_shopexport2 foreign key(employee_id) references users(id);
+-- insert value du lieu
+INSERT INTO salary_levels (name, hourly_wage, description) VALUES
+('Staff Level 1', 15.50, 'Mức lương cơ bản cho nhân viên mới vào'),
+('Manager Level 3', 35.00, 'Mức lương cho cấp quản lý cấp trung');
 
-alter table Shop_import_details add constraint fk_shopimportdetail1 foreign key(import_id) references Shop_imports(id);
-alter table Shop_import_details add constraint fk_shopimportdetail2 foreign key(product_id) references Shop_products(id);
+INSERT INTO users (name, username, password, gender, email, birthday, level_id, phone, is_active, created_at, updated_at) VALUES
+('Nguyễn Văn A', 'vana', 'e10adc3949ba59abbe56e057f20f883e', 1, 'vana@example.com', '1995-05-15', 1, '0901112222', TRUE, NOW(), NOW()),
+('Trần Thị B', 'thib', 'e10adc3949ba59abbe56e057f20f883e', 0, 'thib@example.com', '1998-10-20', 2, '0903334444', TRUE, NOW(), NOW());
+-- Mật khẩu ở đây là mã hóa MD5 của '123456'
 
-alter table Shop_export_details add constraint fk_shopexportdetail1 foreign key(export_id) references Shop_exports(id);
-alter table Shop_export_details add constraint fk_shopexportdetail2 foreign key(product_id) references Shop_products(id);
+INSERT INTO roles (name, display_name, guard_name, created_at, updated_at) VALUES
+('admin', 'Quản trị viên Hệ thống', 'web', NOW(), NOW()),
+('editor', 'Biên tập viên Nội dung', 'web', NOW(), NOW());
+
+INSERT INTO permisions (name, display_name, guard_name, created_at, updated_at) VALUES
+('manage-users', 'Quản lý Người dùng', 'web', NOW(), NOW()),
+('edit-products', 'Chỉnh sửa Sản phẩm', 'web', NOW(), NOW());
+
+select * from users;
