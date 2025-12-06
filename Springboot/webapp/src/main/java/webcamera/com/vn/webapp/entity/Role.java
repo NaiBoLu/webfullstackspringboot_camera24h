@@ -7,15 +7,14 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "users")
-public class User {
+@Table(name = "roles")
+public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -23,53 +22,22 @@ public class User {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "username")
-    private String username;
+    @Column(name = "display_name")
+    private String displayName;
 
-    @Column(name = "password")
-    private String password;
-
-    @Column(name = "gender")
-    private Long gender;
-
-    @Column(name = "email")
-    private String email;
-
-    @Column(name = "birthday")
-    private LocalDate birthday;
-
-    //avatar
-    @Column(name = "avatar")
-    private String avatar;
-
-    @Column(name = "level_id")
-    private int levelId;
-
-    @Column(name = "phone")
-    private String phone;
-
-    @Column(name = "address")
-    private String address;
-
-    @Column(name = "country")
-    private String country;
-
-    @Column(name = "remember_token")
-    private String rememberToken;
-
-    @Column(name = "is_active")
-    private Long isActive;
+    @Column(name = "guard_name")
+    private String guardName;
 
     // updatable = false: không cho phép cập nhật sau khi tạo đảm bảo tính truy vết lịch sử
     /*@CreationTimestamp:Tự động gán giá trị thời gian hiện tại (NOW()) cho trường này khi
      bản ghi được chèn (INSERT) vào CSDL.*/
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt; // Khi INSERT: = NOW()
+    private LocalDateTime createdAt; // Dùng camelCase cho trường Java
 
     /*@UpdateTimestamp:	Tự động cập nhật giá trị thời gian hiện tại (NOW()) cho trường này
     mỗi khi bản ghi được cập nhật (UPDATE).*/
     @UpdateTimestamp
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;// Khi INSERT: = NOW()
+    private LocalDateTime updatedAt;
 }

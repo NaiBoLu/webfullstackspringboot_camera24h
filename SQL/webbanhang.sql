@@ -171,12 +171,15 @@ alter table product_images add constraint fk_product_imgs foreign key(product_id
 
 -- insert value du lieu
 INSERT INTO salary_levels (name, hourly_wage, description) VALUES
-('Staff Level 1', 15.50, 'Mức lương cơ bản cho nhân viên mới vào'),
-('Manager Level 3', 35.00, 'Mức lương cho cấp quản lý cấp trung');
+('Staff Level 0', 0, 'con cec moi vao ma doi co luong ha may'),
+('Staff Level 1', 18000.00, 'Mức lương cho nhan vien moi vao'),
+('Staff Level 2', 20000.00, 'Mức lương cho nhan vien 1 nam'),
+('Staff Level 3',  23000.00, 'Mức lương cho nhan vien 1.5 nam');
+
+select * from salary_levels;
 
 INSERT INTO users (name, username, password, gender, email, birthday, level_id, phone, is_active, created_at, updated_at) VALUES
-('Nguyễn Văn A', 'vana', 'e10adc3949ba59abbe56e057f20f883e', 1, 'vana@example.com', '1995-05-15', 1, '0901112222', TRUE, NOW(), NOW()),
-('Trần Thị B', 'thib', 'e10adc3949ba59abbe56e057f20f883e', 0, 'thib@example.com', '1998-10-20', 2, '0903334444', TRUE, NOW(), NOW());
+('Nguyễn Văn A', 'vana', 'e10adc3949ba59abbe56e057f20f883e', 1, 'vana@example.com', '1995-05-15', 1, '0901112222', TRUE, NOW(), NOW());
 -- Mật khẩu ở đây là mã hóa MD5 của '123456'
 
 INSERT INTO roles (name, display_name, guard_name, created_at, updated_at) VALUES

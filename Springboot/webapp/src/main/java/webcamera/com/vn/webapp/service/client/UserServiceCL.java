@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import webcamera.com.vn.webapp.DTO.client.UserDTO_CL.UserCreateRequestDTO_CL;
@@ -94,43 +95,48 @@ public class UserServiceCL {
         //a - khoi tao bien response de luu tru ket qua tra ve
         Map<String, Object> response = new HashMap<>();
 
-        /*******xu ly luu ruot img khi create Use******/
-        //tao chuoi randomString  rong ->
-        String randomString = "";
+        String newFile = null;
 
-        //su dung datetime luu thong tin anh tranh trung ten va thoi gian luu anh
-        DateTimeFormatter iso_8601_formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
-        randomString = LocalDateTime.now().format(iso_8601_formatter);
+        //thuc hien kiem tra dieu kien chap nhan ruot img rong
+        if(file != null && !file.isEmpty()){
+            /*******xu ly luu ruot img khi create Use******/
+            //tao chuoi randomString  rong ->
+            String randomString = "";
 
-        /*thiet lap file path lay dung ten goc o dia luu folder trong project
-        * => thg thiet lap file chi dinh url lay: D:\\DOWNLOAD\\img\\....
-        * <=> tuy nhien, ntn vd may windown url  D:\\DOWNLOAD\\img\\.... nhung o may mac  D:/DOWNLOAD/img/....
-        * nhu vay neu thiet lap code nay o tren may windown thi qua may mac doan code rootFolder nay khong sai
-        * nhung ma khac he dieu hanh thi no khong hieu.. viet code nt la viet code co dinh viet code ngu
-        * ==-=> lib java.nio.file.Paths;
-        * */
-        String rootFolder = Paths.get("").toAbsolutePath().toString();
+            //su dung datetime luu thong tin anh tranh trung ten va thoi gian luu anh
+            DateTimeFormatter iso_8601_formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
+            randomString = LocalDateTime.now().format(iso_8601_formatter);
 
-        /*tao duong dan xu ly luu file
-        *  + file.getOriginalFilename(); method xu ly ghi nhan lay cai file ruot anh va tien hanh ghi nhan va luu vao trong folder uploads
-        *  + file.separator: co nhiem vu chinh la dung de chi dau phan cach thu muc: // cua windown, hay dau \ cua mac
-        *  + uploadDir: chinh la ten file lien ket voi cau hinh properties ben file application.properties ban nay
-        * */
-        String newFile = randomString + "_" + file.getOriginalFilename();
-        String filePath = rootFolder + File.separator + uploadDir + File.separator + newFile;
+            /*thiet lap file path lay dung ten goc o dia luu folder trong project
+             * => thg thiet lap file chi dinh url lay: D:\\DOWNLOAD\\img\\....
+             * <=> tuy nhien, ntn vd may windown url  D:\\DOWNLOAD\\img\\.... nhung o may mac  D:/DOWNLOAD/img/....
+             * nhu vay neu thiet lap code nay o tren may windown thi qua may mac doan code rootFolder nay khong sai
+             * nhung ma khac he dieu hanh thi no khong hieu.. viet code nt la viet code co dinh viet code ngu
+             * ==-=> lib java.nio.file.Paths;
+             * */
+            String rootFolder = Paths.get("").toAbsolutePath().toString();
 
-        //tien hanh xu ly luu file vao thu muc uploads. Đây là hành động lấy ra một chiếc phong bì mới tinh và viết Địa chỉ Nhà (filePath)
-        // lên đó. Chiếc phong bì này chưa chứa bức thư hay ảnh đâu nhé, nó chỉ là tấm bìa ghi địa chỉ thôi!
-        File destinationFile = new File(filePath);
+            /*tao duong dan xu ly luu file
+             *  + file.getOriginalFilename(); method xu ly ghi nhan lay cai file ruot anh va tien hanh ghi nhan va luu vao trong folder uploads
+             *  + file.separator: co nhiem vu chinh la dung de chi dau phan cach thu muc: // cua windown, hay dau \ cua mac
+             *  + uploadDir: chinh la ten file lien ket voi cau hinh properties ben file application.properties ban nay
+             * */
+            newFile = randomString + "_" + file.getOriginalFilename();
+            String filePath = rootFolder + File.separator + uploadDir + File.separator + newFile;
 
-        /*tien hanh tao folder uploads trong projects neu no khong ton tai*/
-        destinationFile.getParentFile().mkdirs();
+            //tien hanh xu ly luu file vao thu muc uploads. Đây là hành động lấy ra một chiếc phong bì mới tinh và viết Địa chỉ Nhà (filePath)
+            // lên đó. Chiếc phong bì này chưa chứa bức thư hay ảnh đâu nhé, nó chỉ là tấm bìa ghi địa chỉ thôi!
+            File destinationFile = new File(filePath);
 
-        //tien hanh lay ruot anh(anh goc, kich co anh(nhieu mb...)) ghi nhan va luu vao file
-        try{
-            file.transferTo(destinationFile);
-        }catch(IOException e){
-            e.printStackTrace();
+            /*tien hanh tao folder uploads trong projects neu no khong ton tai*/
+            destinationFile.getParentFile().mkdirs();
+
+            //tien hanh lay ruot anh(anh goc, kich co anh(nhieu mb...)) ghi nhan va luu vao file
+            try{
+                file.transferTo(destinationFile);
+            }catch(IOException e){
+                e.printStackTrace();
+            }
         }
 
         //b-1 xu ly service  validation exception kiem tra tinh hop le khi dien thong tin
@@ -172,14 +178,23 @@ public class UserServiceCL {
             User newEntity = new User();
             newEntity.setName(objCreate.getName());
             newEntity.setUsername(objCreate.getUsername());
-            newEntity.setPassword(objCreate.getPassword());
+
+            //xử ly mahoa matkhau theo chuan bcrypt thanh ma bam (hash) bao mat thong tin
+            String rawPassword = objCreate.getPassword();
+            BCryptPasswordEncoder endCoder = new BCryptPasswordEncoder(); //xu ly mat khau bang thuat toan bcrypt
+            String encryptedPassword = endCoder.encode(rawPassword); // tien hanh ma hoa brypt password  tu client nhap vao
+            newEntity.setPassword(encryptedPassword);
+
+
             newEntity.setEmail(objCreate.getEmail());
 
             //xu ly goi repo luu img co ruot
             newEntity.setAvatar(newFile);
 
             //lk khoa ngoai cua table salary_level
-            newEntity.setLevelId(objCreate.getLevelId());
+            //newEntity.setLevelId(objCreate.getLevelId());
+            int defaultLevelId = 7;
+            newEntity.setLevelId(defaultLevelId);
 
             newEntity.setPhone(objCreate.getPhone());
             newEntity.setIsActive((long)1);//set mac dinh avatar mac dinh
@@ -305,7 +320,7 @@ public class UserServiceCL {
             response.put("statuscode", 404);
             response.put("msg", " update khong thanh cong");
 
-            return new ResponseEntity<>(response, HttpStatus.OK);
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }
 
