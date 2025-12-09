@@ -185,7 +185,6 @@ public class UserServiceCL {
             String encryptedPassword = endCoder.encode(rawPassword); // tien hanh ma hoa brypt password  tu client nhap vao
             newEntity.setPassword(encryptedPassword);
 
-
             newEntity.setEmail(objCreate.getEmail());
 
             //xu ly goi repo luu img co ruot

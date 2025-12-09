@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import webcamera.com.vn.webapp.DTO.client.RoleHasPermissionsDTO_CL.RoleHasPerBatchCreateRequestDTO_CL;
 import webcamera.com.vn.webapp.DTO.client.RoleHasPermissionsDTO_CL.RoleHasPerCreateRequestDTO_CL;
 import webcamera.com.vn.webapp.DTO.client.RoleHasPermissionsDTO_CL.RoleHasPerUpdateRequestDTO_CL;
 import webcamera.com.vn.webapp.service.client.RoleHasPermissionsServiceCL;
@@ -40,6 +41,22 @@ public class RoleHasPermissionControllerCL {
             response.put("msg","co loi vui long xem lai huhuhu");
 
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    //api create batch userhasroles
+    @PostMapping("/batch-create")
+    public ResponseEntity<Map<String, Object>> batchCreate(@Valid @RequestBody RoleHasPerBatchCreateRequestDTO_CL objCreate){
+        try{
+            return roleHasPermissionsServiceCL.batchCreateRoleHasPermission(objCreate);
+        }catch(Exception ex){
+            Map<String, Object> response = new HashMap<>();
+
+            response.put("data",ex.getMessage());
+            response.put("statuscode",500);
+            response.put("msg","co loi kiem tra lai huhuhu");
+
+            return new ResponseEntity<>(response,HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

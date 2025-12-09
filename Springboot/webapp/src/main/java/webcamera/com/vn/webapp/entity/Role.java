@@ -8,6 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Data
@@ -40,4 +41,10 @@ public class Role {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "role")
+    private List<UserHasRoles> roleHasUsers;
+
+    @OneToMany(mappedBy = "role")
+    private List<RoleHasPermissions> roleHasPermissions;
 }

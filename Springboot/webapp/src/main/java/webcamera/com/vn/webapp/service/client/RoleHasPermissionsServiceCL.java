@@ -8,19 +8,29 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import webcamera.com.vn.webapp.DTO.client.RoleHasPermissionsDTO_CL.RoleHasPerBatchCreateRequestDTO_CL;
 import webcamera.com.vn.webapp.DTO.client.RoleHasPermissionsDTO_CL.RoleHasPerCreateRequestDTO_CL;
 import webcamera.com.vn.webapp.DTO.client.RoleHasPermissionsDTO_CL.RoleHasPerUpdateRequestDTO_CL;
+import webcamera.com.vn.webapp.entity.Permission;
+import webcamera.com.vn.webapp.entity.Role;
 import webcamera.com.vn.webapp.entity.RoleHasPermissions;
+import webcamera.com.vn.webapp.entity.User;
+import webcamera.com.vn.webapp.repository.PermissionRepository;
 import webcamera.com.vn.webapp.repository.RoleHasPermissionRepository;
+import webcamera.com.vn.webapp.repository.RoleRepository;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class RoleHasPermissionsServiceCL {
     @Autowired
     private RoleHasPermissionRepository roleHasPermissionRepo;
+
+    @Autowired
+    private RoleRepository roleRepo;
+
+    @Autowired
+    private PermissionRepository permissionRepo;
 
     //getall co phan trang
     public ResponseEntity<Map<String, Object>> getAllRoleHasPermission(Integer pageNumber, Integer pageSize, String sortBy){
@@ -64,8 +74,13 @@ public class RoleHasPermissionsServiceCL {
         //c-1 khoi tao UserEntity
         RoleHasPermissions newEntity = new RoleHasPermissions();
 
-        newEntity.setRoleId(objcreate.getRoleId());
-        newEntity.setPermissionId(objcreate.getPermissionId());
+        Role role = roleRepo.findById(objcreate.getRoleId())
+                .orElseThrow(() -> new RuntimeException("Role not found"));
+        Permission permission = permissionRepo.findById(objcreate.getPermissionId())
+                .orElseThrow(() -> new RuntimeException("Permission not found"));
+
+        newEntity.setRole(role);
+        newEntity.setPermission(permission);
 
         //nhờ repo luu lại vào db
         RoleHasPermissions createEntity = roleHasPermissionRepo.save(newEntity);
@@ -77,6 +92,41 @@ public class RoleHasPermissionsServiceCL {
 
         return new ResponseEntity<>(response,HttpStatus.CREATED);
     }
+
+    /*II - 1: Post(create batch nhieu permissions cho role)*/
+    public ResponseEntity<Map<String, Object>> batchCreateRoleHasPermission(RoleHasPerBatchCreateRequestDTO_CL objCreate){
+        //tao response luu ket qua tra ve
+        Map<String, Object> response = new HashMap<>();
+
+        //goiu repository create nhieu role cho mot user
+        List<RoleHasPermissions> listCreateEntity = new ArrayList<>();
+        try{
+            for(Integer permissionId : objCreate.getPermissionId()){
+                RoleHasPermissions roleHasPermissions = new RoleHasPermissions();
+
+                Role role = roleRepo.findById(objCreate.getRoleId())
+                        .orElseThrow(() -> new RuntimeException("Role not found"));
+                Permission permission = permissionRepo.findById(permissionId)
+                        .orElseThrow(() -> new RuntimeException("Permission not found"));
+
+                roleHasPermissions.setRole(role);
+                roleHasPermissions.setPermission(permission);
+
+                roleHasPermissionRepo.save(roleHasPermissions);
+                listCreateEntity.add(roleHasPermissions);
+            }
+        }catch(Exception ex){
+            throw ex;
+        }
+
+        //tra ve ket qua chuan rest full api
+        response.put("data",listCreateEntity);
+        response.put("statuscode",201);
+        response.put("msg","create thanh cong oh yeah");
+
+        return new ResponseEntity<>(response,HttpStatus.OK);
+    }
+
 
     //update
     public ResponseEntity<Map<String, Object>> updateRoleHasPermission(Integer id, RoleHasPerUpdateRequestDTO_CL objUpdate){
@@ -93,10 +143,18 @@ public class RoleHasPermissionsServiceCL {
 
             //kiem tra va cap nha cac truong tt null hoawc empty -> tien hanh bo qua va ghi nhan
             if(objUpdate.getRoleId() != null){
-                entityEdit.setRoleId(objUpdate.getRoleId());
+                Role role = roleRepo.findById(objUpdate.getRoleId())
+                        .orElseThrow(() -> new RuntimeException("New roleid not found"));
+
+                // capnhat goi tuong entity userid
+                entityEdit.setRole(role);
             }
             if(objUpdate.getPermissionId() != null ){
-                entityEdit.setPermissionId(objUpdate.getPermissionId());
+                Permission permission = permissionRepo.findById(objUpdate.getPermissionId())
+                        .orElseThrow(() -> new RuntimeException("New permissionid not found"));
+
+                // capnhat goi tuong entity userid
+                entityEdit.setPermission(permission);
             }
 
             //goi repoluu lai cap nhat

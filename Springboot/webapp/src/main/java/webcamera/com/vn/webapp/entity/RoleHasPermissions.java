@@ -15,10 +15,12 @@ public class RoleHasPermissions {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "role_id", nullable = false)
-    private int roleId;
+    @ManyToOne
+    @JoinColumn(name = "role_id")
+    private  Role role;
 
-    @Column(name = "permission_id", nullable = false)
-    private int permissionId;
+    @ManyToOne
+    @JoinColumn(name = "permission_id")
+    private Permission permission;
 
 }

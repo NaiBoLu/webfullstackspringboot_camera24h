@@ -9,6 +9,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Data
@@ -72,4 +73,7 @@ public class User {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;// Khi INSERT: = NOW()
+
+    @OneToMany(mappedBy = "user")
+    private List<UserHasRoles> userHasRoles;
 }

@@ -1,5 +1,6 @@
 package webcamera.com.vn.webapp.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,10 +16,13 @@ public class UserHasRoles {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "user_id", nullable = false)
-    private int userId;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    @JsonIgnore // <--- Thêm Annotation này parrse json
+    private User user;
 
-    @Column(name = "role_id", nullable = false)
-    private int roleId;
-
+    @ManyToOne
+    @JoinColumn(name = "role_id")
+    @JsonIgnore // <--- Thêm Annotation này parrse json
+    private Role role;
 }

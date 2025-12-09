@@ -11,8 +11,12 @@ import org.springframework.stereotype.Service;
 import webcamera.com.vn.webapp.DTO.client.UserHasRolesDTO_CL.UserHasRoleCreateRequestDTO_CL;
 import webcamera.com.vn.webapp.DTO.client.UserHasRolesDTO_CL.UserHasRoleUpdateRequestDTO_CL;
 import webcamera.com.vn.webapp.DTO.client.UserHasRolesDTO_CL.UserHasRolesBatchCreateRequestDTO_CL;
+import webcamera.com.vn.webapp.entity.Role;
+import webcamera.com.vn.webapp.entity.User;
 import webcamera.com.vn.webapp.entity.UserHasRoles;
+import webcamera.com.vn.webapp.repository.RoleRepository;
 import webcamera.com.vn.webapp.repository.UserHasRolesRepository;
+import webcamera.com.vn.webapp.repository.UserRepository;
 
 import java.util.*;
 
@@ -20,6 +24,12 @@ import java.util.*;
 public class UserHasRolesServiceCL {
     @Autowired
     private UserHasRolesRepository userHasRolesRepo;
+
+    @Autowired
+    private UserRepository userRepo;
+
+    @Autowired
+    private RoleRepository roleRepo;
 
     //getall co phan trang
     public ResponseEntity<Map<String, Object>> getAllUserHasRole(Integer pageNumber, Integer pageSize, String sortBy){
@@ -63,8 +73,18 @@ public class UserHasRolesServiceCL {
         //c-1 khoi tao UserEntity
         UserHasRoles newEntity = new UserHasRoles();
 
-        newEntity.setUserId(objcreate.getUserId());
-        newEntity.setRoleId(objcreate.getRoleId());
+        /*cach viet cu khi khong dung annotation lk khoa ngoai: OneTOMany, ManyToOne...*/
+//        newEntity.setUserId(objcreate.getUserId());
+//        newEntity.setRoleId(objcreate.getRoleId());
+
+        /*cach viet moi khi co dung lk khoa ngoai: OneTOMany, ManyToOne...*/
+        User user = userRepo.findById(objcreate.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Role role = roleRepo.findById(objcreate.getRoleId())
+                        .orElseThrow(() -> new RuntimeException("Role not found"));
+
+        newEntity.setUser(user);
+        newEntity.setRole(role);
 
         //nhờ repo luu lại vào db
         UserHasRoles createEntity = userHasRolesRepo.save(newEntity);
@@ -88,8 +108,14 @@ public class UserHasRolesServiceCL {
         try{
             for(Integer roleId : objCreate.getListRoleId()){
                 UserHasRoles userHasRoles = new UserHasRoles();
-                userHasRoles.setUserId(objCreate.getUserId());
-                userHasRoles.setRoleId(roleId);
+
+                User user = userRepo.findById(objCreate.getUserId())
+                        .orElseThrow(() -> new RuntimeException("User not found"));
+                Role role = roleRepo.findById(roleId)
+                        .orElseThrow(() -> new RuntimeException("Role not found"));
+
+                userHasRoles.setUser(user);
+                userHasRoles.setRole(role);
 
                 userHasRolesRepo.save(userHasRoles);
                 listCreateEmtoty.add(userHasRoles);
@@ -122,10 +148,18 @@ public class UserHasRolesServiceCL {
 
             //kiem tra va cap nha cac truong tt null hoawc empty -> tien hanh bo qua va ghi nhan
             if(objUpdate.getUserId() != null ){
-                entityEdit.setUserId(objUpdate.getUserId());
+               User user = userRepo.findById(objUpdate.getUserId())
+                       .orElseThrow(() -> new RuntimeException("New userid not found"));
+
+                 // capnhat goi tuong entity userid
+                entityEdit.setUser(user);
             }
             if(objUpdate.getRoleId() != null){
-                entityEdit.setRoleId(objUpdate.getRoleId());
+                Role role = roleRepo.findById(objUpdate.getRoleId())
+                        .orElseThrow(() -> new RuntimeException("New roleid not found"));
+
+                // capnhat goi tuong entity userid
+                entityEdit.setRole(role);
             }
 
 
