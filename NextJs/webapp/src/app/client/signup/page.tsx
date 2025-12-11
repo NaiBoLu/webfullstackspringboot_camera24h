@@ -1,12 +1,11 @@
 "use client";
 
 import { Form, Button, Card, Container } from "react-bootstrap";
-import "./signup.css";
 import Link from "next/link";
 
 export default function SignupPage() {
   return (
-    <div className="bg">
+    <div>
       <Container className="d-flex justify-content-center align-items-center vh-100">
         <Card className="glass p-4" style={{ width: "400px" }}>
           <h3 className="text-center fw-bold mb-4 text-white">

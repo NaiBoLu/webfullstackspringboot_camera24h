@@ -36,10 +36,10 @@ export default function Header() {
   /*useEffect: method xu ly hanh dong hide/show modal context sau khi giao dien dc 
   render thanh cong
   -> pathname giup khi dong form login thi route Link nos doi sang trang moi*/
-  const pathName = usePathname;
+  const pathName = usePathname();
   useEffect(() => {
     //hide an form login khi bam dau x, button clode hay bam vung ngaoi form r
-    closeModal;
+    closeModal();
   }, [pathName]);
 
   return (
