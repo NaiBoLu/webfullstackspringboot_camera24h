@@ -1,9 +1,10 @@
 package webcamera.com.vn.webapp.controller.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -11,7 +12,6 @@ import webcamera.com.vn.webapp.DTO.client.UserDTO_CL.UserCreateRequestDTO_CL;
 import webcamera.com.vn.webapp.DTO.client.UserDTO_CL.UserUpdateRequestDTO_CL;
 import webcamera.com.vn.webapp.service.client.UserServiceCL;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -32,21 +32,8 @@ public class UserControllerCL {
 
     /*****************-2 create**************************/
     @PostMapping("/create")
-    public ResponseEntity<Map<String, Object>> create(@RequestParam("file") MultipartFile file,
-                                                      @RequestParam("data") String jsonData){
-        //goij class ObjeMapper de mapp json(param:data) -> parse(chuyen) json thanh valu trong dto -> day len entity user
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        //goi khoi  tao lop dto userDTO
-        UserCreateRequestDTO_CL objDTO = null;
-
-        //tien hanh cho dto doc vaf ghi nhan data tu json dui len map thong qua lop ObjectMapper
-        try{
-            objDTO = objectMapper.readValue(jsonData, UserCreateRequestDTO_CL.class);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        return userServiceCL.createUser(objDTO, file);
+    public ResponseEntity<Map<String, Object>> create(@Valid @RequestBody UserCreateRequestDTO_CL objCreate){
+        return userServiceCL.createUser(objCreate);
     }
 
 

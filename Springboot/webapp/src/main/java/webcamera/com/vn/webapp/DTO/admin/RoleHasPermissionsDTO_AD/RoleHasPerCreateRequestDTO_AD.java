@@ -1,4 +1,4 @@
-package webcamera.com.vn.webapp.DTO.client.RoleHasPermissionsDTO_CL;
+package webcamera.com.vn.webapp.DTO.admin.RoleHasPermissionsDTO_AD;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RoleHasPerCreateRequestDTO_CL {
+public class RoleHasPerCreateRequestDTO_AD {
     @NotNull(message = "ko duoc de trong role id")
     private Integer roleId;
 

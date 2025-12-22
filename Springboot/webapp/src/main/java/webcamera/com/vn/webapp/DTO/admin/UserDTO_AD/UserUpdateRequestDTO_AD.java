@@ -1,4 +1,4 @@
-package webcamera.com.vn.webapp.DTO.client.UserDTO_CL;
+package webcamera.com.vn.webapp.DTO.admin.UserDTO_AD;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
@@ -20,8 +20,8 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 @NoArgsConstructor
 @Getter
 @Setter
-public class UserUpdateRequestDTO_CL {
-   @NotBlank(message = "khogn dc de name trong")
+public class UserUpdateRequestDTO_AD {
+    @NotBlank(message = "khogn dc de name trong")
     @Length(min = 3, max = 70, message = "ten name phai co it nhat la 3 ky tu")
     private String name;
 
@@ -62,4 +62,3 @@ public class UserUpdateRequestDTO_CL {
     @NotNull(message = "khong dc de trong")
     private Integer isActive;
 }
-   

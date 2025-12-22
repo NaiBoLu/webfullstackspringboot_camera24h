@@ -13,10 +13,7 @@ import org.hibernate.validator.constraints.Length;
 @Getter
 @Setter
 public class UserCreateRequestDTO_CL {
-    @NotBlank(message = "khogn dc de name trong")
-    @Length(min = 3, max = 70, message = "ten name phai co it nhat la 3 ky tu")
-    private String name;
-
+   
     @NotBlank(message = "khogn dc de username trong")
     @Length(min = 3, max = 70, message = "ten username phai co it nhat la 3 ky tu")
     private String username;
@@ -25,20 +22,4 @@ public class UserCreateRequestDTO_CL {
     @Length(min = 6, max = 128, message = "mk it nhat la phai co 6 -128 ky tu")
     private String password;
 
-    @NotBlank(message = "khong dc de trong email")
-    @Email(message = "phai dung cau truc email la <name@gmail.com>")
-    private String email;
-
-    @NotBlank(message = "khong dc de trong muc luong")
-    private int levelId;
-
-    @Pattern(message = "phai dung cau truc sdt; xxxx-xxx-xxx", regexp = "^\\d{4}\\d{3}\\d{3}$")
-    private String phone;
-
-    @NotBlank(message = "khong dc de trong dia chi nha may")
-    @Length(max = 500)
-    private String address;
-
-    @NotNull(message = "khong dc de trong")
-    private Long isActive;
 }

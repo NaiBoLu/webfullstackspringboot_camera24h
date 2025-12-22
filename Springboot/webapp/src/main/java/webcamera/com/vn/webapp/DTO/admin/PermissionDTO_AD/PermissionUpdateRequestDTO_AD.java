@@ -1,4 +1,4 @@
-package webcamera.com.vn.webapp.DTO.client.PermissionDTO_CL;
+package webcamera.com.vn.webapp.DTO.admin.PermissionDTO_AD;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PermissionUpdateRequestDTO_CL {
+public class PermissionUpdateRequestDTO_AD {
     @NotBlank(message = "name ko duoc de trong")
     @Size(min = 3, message = "name co do dai toi thieu 3 ky tu")
     private String name;

@@ -31,7 +31,7 @@ public class User {
     private String password;
 
     @Column(name = "gender")
-    private Long gender;
+    private Integer gender;
 
     @Column(name = "email")
     private String email;
@@ -44,7 +44,7 @@ public class User {
     private String avatar;
 
     @Column(name = "level_id")
-    private int levelId;
+    private Integer levelId;
 
     @Column(name = "phone")
     private String phone;
@@ -59,7 +59,7 @@ public class User {
     private String rememberToken;
 
     @Column(name = "is_active")
-    private Long isActive;
+    private Integer isActive;
 
     // updatable = false: không cho phép cập nhật sau khi tạo đảm bảo tính truy vết lịch sử
     /*@CreationTimestamp:Tự động gán giá trị thời gian hiện tại (NOW()) cho trường này khi
@@ -76,4 +76,19 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     private List<UserHasRoles> userHasRoles;
+
+    /*******ĐOẠN NÀY LẤY DANH SÁCH VAI TRÒ giữa các table user,
+     * role, user_has_role
+     * --> sử dụng annotation lk bằng ManyToMany thay cho câu lênh 
+     * sql là: 
+     *     select * from users u
+     *     join user_has_roles uhr on uhr.user_id = u.id
+     *     join roles r on r.role_id = u.id
+     *      where..<dk can xet>   
+     * ****/
+    @ManyToMany
+    @JoinTable(name = "user_has_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
+     private List<Role> listRoles;
 }

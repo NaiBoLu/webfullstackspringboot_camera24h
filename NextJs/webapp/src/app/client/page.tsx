@@ -159,6 +159,7 @@ export default function HomePage() {
           </h1>
 
           {/* Tabs  */}
+
           <Tabs
             defaultActiveKey="bestsaller"
             id="uncontrolled-tab-example"
@@ -321,9 +322,8 @@ export default function HomePage() {
                       fontWeight: "bold",
                       lineHeight: "50px",
                     }}
-                  >
-                    2
-                  </span>
+                  ></span>
+                  2
                 </div>
                 <Image src="/globe.svg" width={144} height={144} />
                 <h5 className="text-white my-5 fw-semibold ">SHOP</h5>

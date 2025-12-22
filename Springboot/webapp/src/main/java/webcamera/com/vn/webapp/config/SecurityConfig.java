@@ -24,24 +24,43 @@ import webcamera.com.vn.webapp.JWT.JwtFilter;
 @EnableMethodSecurity
 public class SecurityConfig {
 
+    /* giai thich so dong code:
+     + .csrf(AbstractHttpConfigurer::disable): tat CSRF protection, vô hiệu hóa CSRF
+     của spring scurity mặc định yêu cầu token csrf cho mỗi method header(put/post/delete/options) 
+     để tránh lỗi 403(không có quyền truy cập) nhưng a API rest không cần CSRF NÀY vì jwt token an toàn hơn
+     + .authorizeHttpRequests:  cấu hình quyền truy cập cho từng request
+     , quyết định request nào cần xác thực, request nào khong cần
+     + auth -> auth.requestMatchers: auth đói tượng cấu hình quyền, requestMatchers chỉ định các 
+     URL patter(danh sách đg dân api).. -> liệt kê các url không cần kiểm tra jwt token(bỏ qua luôn)
+
+
+    */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtFilter jwtFilter) throws Exception{
-        return http.csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(
-                        auth -> auth.requestMatchers(
+        return http
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests( auth -> auth
+                        .requestMatchers(
                                 "/swagger-ui/**",  //cho phep api swagger dc phep qua cong an ninh security
-                                         "/v3/api-docs/**",  //cho phep api docs cua swagger dc phep qua cong an ninh
-                                         "/api/client/users/create/**",
-                                         "/api/client/users/**",
-                                         "/api/client/userhasrole/batch-create/**",
-                                         "/api/client/userhasrole/**"
+                                "/v3/api-docs/**",  //cho phep api docs cua swagger dc phep qua cong an ninh
+                                "/api/auth/**"
                         )
                         .permitAll()  //cho phep truy cap ma khong can kiem tra
                         .anyRequest()
                         .authenticated() //yeu cau security kiem tra cac th con lai
 
                 )
+                /*mặc định spring security tạo session trên server(lưu user infog), essionCreationPolicy.STATELESS 
+                ngăn không cho lưu session trên server -> tại sao??? tại vì dùng jwt token(mang thong tin user rồi)
+                 -> nên không cần lưu trong sesion*/
                 .sessionManagement(sess->sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                /* spring security có một filter mặc định:UsernamePasswordAuthenticationFilter(kiểm tra username
+                passowrd form) , khi bạn muons jwtFilter chay jtrc filter mặc đinh này
+                 => thứ tự chạy: JwtFilter + UsernamePasswordAuthenticationFilter + filter khác còn lại
+                 -> tại sao có đoạn này
+                  + jwtfilter sẽ kiểm tra token jwt trc
+                  + nếu có toekn hợp lệ -> xác thực xong, không cần kiểm tra username/passwordm, 
+                  <=> ngc lại nếu token không hợp lệ -> thì từ chói request này luôn và ngay*/
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class).build();
     }
 

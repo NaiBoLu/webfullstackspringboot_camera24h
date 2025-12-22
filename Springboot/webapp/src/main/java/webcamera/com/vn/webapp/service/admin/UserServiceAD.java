@@ -1,4 +1,4 @@
-package webcamera.com.vn.webapp.service.client;
+package webcamera.com.vn.webapp.service.admin;
 
 
 import jakarta.validation.ConstraintViolationException;
@@ -14,9 +14,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import webcamera.com.vn.webapp.DTO.admin.UserDTO_AD.UserCreateRequestDTO_AD;
 import webcamera.com.vn.webapp.DTO.admin.UserDTO_AD.UserUpdateRequestDTO_AD;
-import webcamera.com.vn.webapp.DTO.client.UserDTO_CL.UserCreateRequestDTO_CL;
-import webcamera.com.vn.webapp.DTO.client.UserDTO_CL.UserUpdateRequestDTO_CL;
 import webcamera.com.vn.webapp.entity.User;
 import webcamera.com.vn.webapp.exceptions.ValidationErrorResponse;
 import webcamera.com.vn.webapp.exceptions.Violations;
@@ -37,7 +36,7 @@ import java.util.regex.Pattern;
 /*lop luan ly logic code*/
 
 @Service
-public class UserServiceCL {
+public class UserServiceAD {
 
     @Autowired
     private webcamera.com.vn.webapp.repository.UserRepository userRepo;
@@ -93,10 +92,53 @@ public class UserServiceCL {
 
     /*II - Post(create)*/
     //MultipartFile: la mot interface trong spring, dc su dung de xu ly cac tep files -> dc upload thog qua giao thuc HTTP request
-    public ResponseEntity<Map<String, Object>> createUser(UserCreateRequestDTO_CL objCreate){
+    public ResponseEntity<Map<String, Object>> createUser(UserCreateRequestDTO_AD objCreate, MultipartFile file){
         //a - khoi tao bien response de luu tru ket qua tra ve
         Map<String, Object> response = new HashMap<>();
 
+        String newFile = null;
+
+        //thuc hien kiem tra dieu kien chap nhan ruot img rong
+        if(file != null && !file.isEmpty()){
+            /*******xu ly luu ruot img khi create Use******/
+            //tao chuoi randomString  rong ->
+            String randomString = "";
+
+            //su dung datetime luu thong tin anh tranh trung ten va thoi gian luu anh
+            DateTimeFormatter iso_8601_formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
+            randomString = LocalDateTime.now().format(iso_8601_formatter);
+
+            /*thiet lap file path lay dung ten goc o dia luu folder trong project
+             * => thg thiet lap file chi dinh url lay: D:\\DOWNLOAD\\img\\....
+             * <=> tuy nhien, ntn vd may windown url  D:\\DOWNLOAD\\img\\.... nhung o may mac  D:/DOWNLOAD/img/....
+             * nhu vay neu thiet lap code nay o tren may windown thi qua may mac doan code rootFolder nay khong sai
+             * nhung ma khac he dieu hanh thi no khong hieu.. viet code nt la viet code co dinh viet code ngu
+             * ==-=> lib java.nio.file.Paths;
+             * */
+            String rootFolder = Paths.get("").toAbsolutePath().toString();
+
+            /*tao duong dan xu ly luu file
+             *  + file.getOriginalFilename(); method xu ly ghi nhan lay cai file ruot anh va tien hanh ghi nhan va luu vao trong folder uploads
+             *  + file.separator: co nhiem vu chinh la dung de chi dau phan cach thu muc: // cua windown, hay dau \ cua mac
+             *  + uploadDir: chinh la ten file lien ket voi cau hinh properties ben file application.properties ban nay
+             * */
+            newFile = randomString + "_" + file.getOriginalFilename();
+            String filePath = rootFolder + File.separator + uploadDir + File.separator + newFile;
+
+            //tien hanh xu ly luu file vao thu muc uploads. Đây là hành động lấy ra một chiếc phong bì mới tinh và viết Địa chỉ Nhà (filePath)
+            // lên đó. Chiếc phong bì này chưa chứa bức thư hay ảnh đâu nhé, nó chỉ là tấm bìa ghi địa chỉ thôi!
+            File destinationFile = new File(filePath);
+
+            /*tien hanh tao folder uploads trong projects neu no khong ton tai*/
+            destinationFile.getParentFile().mkdirs();
+
+            //tien hanh lay ruot anh(anh goc, kich co anh(nhieu mb...)) ghi nhan va luu vao file
+            try{
+                file.transferTo(destinationFile);
+            }catch(IOException e){
+                e.printStackTrace();
+            }
+        }
 
         //b-1 xu ly service  validation exception kiem tra tinh hop le khi dien thong tin
         ValidationErrorResponse responseError = new ValidationErrorResponse();
@@ -135,16 +177,38 @@ public class UserServiceCL {
         if(responseError.getViolations().size() == 0){
             //c-1 khoi tao UserEntity
             User newEntity = new User();
+            newEntity.setName(objCreate.getName());
             newEntity.setUsername(objCreate.getUsername());
 
             //xử ly mahoa matkhau theo chuan bcrypt thanh ma bam (hash) bao mat thong tin
             BCryptPasswordEncoder endCoder = new BCryptPasswordEncoder(); //xu ly mat 
             newEntity.setPassword(endCoder.encode(objCreate.getPassword()));
 
-            newEntity.setGender(1);
+            //su dung intValue 
+            if(objCreate.getGender() != null){
+                newEntity.setGender(objCreate.getGender());
+            }
+
+            newEntity.setEmail(objCreate.getEmail());
+
+            //xu ly create birthday
+            if(objCreate.getBirthday() != null){
+                newEntity.setBirthday(objCreate.getBirthday());
+            }
+
+            //xu ly goi repo luu img co ruot
+            newEntity.setAvatar(newFile);
+
             //lk khoa ngoai cua table salary_level
-            newEntity.setLevelId(7);
-            newEntity.setIsActive(1);
+            newEntity.setLevelId(objCreate.getLevelId());
+            newEntity.setPhone(objCreate.getPhone());
+            newEntity.setAddress(objCreate.getAddress());
+            newEntity.setCountry(objCreate.getCountry());
+            newEntity.setRememberToken(objCreate.getRememberToken());
+            
+            if(objCreate.getIsActive() != null){
+                newEntity.setIsActive(objCreate.getIsActive());
+            }
 
            // c-2 yeu cau repository luu lai khoi tao tren
             // thuc hien
@@ -178,9 +242,9 @@ public class UserServiceCL {
     }
 
 
-     /*III - Put(Update0*/
+    /*III - Put(Update0*/
 
-    public ResponseEntity<Map<String, Object>> updateUser(Integer id, UserUpdateRequestDTO_CL objEdit, MultipartFile file){
+    public ResponseEntity<Map<String, Object>> updateUser(Integer id, UserUpdateRequestDTO_AD objEdit, MultipartFile file){
         // khoi tao bien response luu tru ket qua tra ve
         Map<String, Object> response = new HashMap<>();
 

@@ -1,4 +1,4 @@
-package webcamera.com.vn.webapp.service.client;
+package webcamera.com.vn.webapp.service.admin;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -8,28 +8,30 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import webcamera.com.vn.webapp.DTO.client.RoleDTO_CL.RoleCreateRequestDTO_CL;
-import webcamera.com.vn.webapp.DTO.client.RoleDTO_CL.RoleUpdateRequestDTO_CL;
-import webcamera.com.vn.webapp.entity.Role;
-import webcamera.com.vn.webapp.repository.RoleRepository;
+
+import webcamera.com.vn.webapp.DTO.admin.PermissionDTO_AD.PermissionCreateRequestDTO_AD;
+import webcamera.com.vn.webapp.DTO.admin.PermissionDTO_AD.PermissionUpdateRequestDTO_AD;
+import webcamera.com.vn.webapp.entity.Permission;
+import webcamera.com.vn.webapp.repository.PermissionRepository;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@Service
-public class RoleServiceCL {
-    @Autowired
-    private RoleRepository roleRepo;
 
-    //getall co phan trang
-    public ResponseEntity<Map<String, Object>> getAllRole(Integer pageNumber, Integer pageSize, String sortBy){
+@Service
+public class PermissionServiceAD {
+    @Autowired
+    private PermissionRepository permissionRepo;
+
+    // getall co phan trang
+    public ResponseEntity<Map<String, Object>> getAllPermission(Integer pageNumber, Integer pageSize, String sortBy){
         // tao response luu ket qua tra ve
         Map<String, Object> response = new HashMap<>();
 
         //xu ly phan trang
         Pageable pageable = PageRequest.of(pageNumber -1, pageSize, Sort.by(sortBy)); // yeu cau
-        Page<Role> pageResult = roleRepo.findAll(pageable); // goi repo lay ket qua tat ca
+        Page<Permission> pageResult = permissionRepo.findAll(pageable); // goi repo lay ket qua tat ca
 
         //neu co noi dung
         if(pageResult.hasContent()){
@@ -56,41 +58,41 @@ public class RoleServiceCL {
         }
     }
 
-    //create tao role
-    public ResponseEntity<Map<String, Object>> createRole(RoleCreateRequestDTO_CL objCreate){
-        //tạo response luu kq tra ve
+    /*II - Post(create)*/
+    public ResponseEntity<Map<String, Object>> createPermission(PermissionCreateRequestDTO_AD objcreate ){
+        //response luu ket qua tra ve
         Map<String, Object> response = new HashMap<>();
 
-        //chuyen dto thanh entity
-        Role newEntity = new Role();
+        //c-1 khoi tao UserEntity
+        Permission newEntity = new Permission();
 
-        newEntity.setName(objCreate.getName());
-        newEntity.setDisplayName(objCreate.getDisplayName());
-        newEntity.setGuardName(objCreate.getGuardName());
+        newEntity.setName(objcreate.getName());
+        newEntity.setDisplayName(objcreate.getDisplayName());
+        newEntity.setGuardName(objcreate.getGuardName());
 
         //nhờ repo luu lại vào db
-        Role createEntity = roleRepo.save(newEntity);
+        Permission createEntity = permissionRepo.save(newEntity);
 
         //c-4 tra ve ket qua cho nguoi dung theo chuan restfullAPI
         response.put("data",createEntity);
         response.put("statuscode",200);
-        response.put("msg","create thi create lam deo gi cang");
+        response.put("msg","create thanh cong oh yeah");
 
         return new ResponseEntity<>(response,HttpStatus.CREATED);
     }
 
-    //update role
-    public ResponseEntity<Map<String, Object>> updateRole(Integer id,RoleUpdateRequestDTO_CL objUpdate){
-        //tao response luu kq tra ve
+    //update
+    public ResponseEntity<Map<String, Object>> updatePermission(Integer id, PermissionUpdateRequestDTO_AD objUpdate){
+        //tao response luu ket qua tra ve
         Map<String, Object> response = new HashMap<>();
 
-        //tim kiem update theo id
-        Optional<Role> optFound = roleRepo.findById(id);
+        //tim kiem entity theo id
+        Optional<Permission> optFound = permissionRepo.findById(id);
 
-        //neu tim thay thi cap nhat ko thi thong bao 404
+        //neu tim thay thi lay ra update
         if(optFound.isPresent()){
             //lay entity ra khoi hop qua opt
-            Role entityEdit = optFound.get();
+            Permission entityEdit = optFound.get();
 
             //kiem tra va cap nha cac truong tt null hoawc empty -> tien hanh bo qua va ghi nhan
             if(objUpdate.getName() != null && !objUpdate.getName().isEmpty()){
@@ -104,7 +106,7 @@ public class RoleServiceCL {
             }
 
             //goi repoluu lai cap nhat
-            Role updatedEntity = roleRepo.save(entityEdit);
+            Permission updatedEntity = permissionRepo.save(entityEdit);
 
             //goi response tra ve ket qua
             response.put("data",updatedEntity);
@@ -113,6 +115,7 @@ public class RoleServiceCL {
 
             return new ResponseEntity<>(response,HttpStatus.OK);
         }else{
+
             //goi response tra ve ket qua
             response.put("data",null);
             response.put("statuscode",404);
@@ -122,21 +125,21 @@ public class RoleServiceCL {
         }
     }
 
-    //delete xoa role
-    public ResponseEntity<Map<String, Object>> deleteRole(Integer id){
+    //delete xoa
+    public ResponseEntity<Map<String, Object>> deletePermission(Integer id){
         //tao response luu ket qua tra ve
         Map<String,Object> response = new HashMap<>();
 
         //tim theo id
-        Optional<Role> optFound = roleRepo.findById(id);
+        Optional<Permission> optFound = permissionRepo.findById(id);
 
         //neu tim thay thi xoa
         if(optFound.isPresent()){
             //lay entity ra khoi hop qua opt
-            Role deleteEntity = optFound.get();
+            Permission deleteEntity = optFound.get();
 
             //goi repo xoa entity
-            roleRepo.delete(deleteEntity);
+            permissionRepo.delete(deleteEntity);
 
             //goi response luu ket qua tra ve
             response.put("data",null);

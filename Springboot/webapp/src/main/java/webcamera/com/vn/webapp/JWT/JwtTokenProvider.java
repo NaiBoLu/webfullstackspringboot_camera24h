@@ -20,15 +20,27 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
+import java.security.Key;
 import java.util.Date;
 
 @Component
 public class JwtTokenProvider{
-  /*tao chu ky signature
-   -> tao ma jwtSecrets: truy cap trang "bcrypt.online"
-    $2y$10$TJg/yMP/C.w0Mr1eZhQY8uQmdI3tqATLEvexfJ8KJ5ddUcpIytZk6: "Toi la Ngo Tan Tai sinh vien IT sieu cap vip Pro o Bac Lieu"
+   /*phần signature tạo chứ ký xác thực
+    -> vai  tro:
+     + dùng kế ký và xác minh jwt bằng thuật toán HMAC SHA-256(HS256)
+    -> cách hoạt động
+     + khi gọi signWIth(key, SignatureAlgorithm.HS256)
+     + thư viện jwt sẽ
+       ++ lấy header + payload
+       ++ dùng thuật toán HS256
+       ++ kết hợp với SECRET KEY(biến key))
+       --> sinh ra phần signature của jwt(chữ ký của jwt token)
    */
-    private final String jwtSecrets = "$2y$10$TJg/yMP/C.w0Mr1eZhQY8uQmdI3tqATLEvexfJ8KJ5ddUcpIytZk6";
+    private static final String JWT_SECRET = "my-jwt-secret-key-32-bytes-long!!";
+
+    //tao doi tnggn key chuan thuat toan HS256 tu chuoi JWT_SECRET tren
+    private final Key key = Keys.hmacShaKeyFor(JWT_SECRET.getBytes(StandardCharsets.UTF_8));
 
     /*encode - tao  sinh ra token(tao ra token voi dinh dang da ma hoa encrypt)*/
     public String generateToken(String username){
@@ -52,7 +64,8 @@ public class JwtTokenProvider{
                 .setSubject(username)
                 .setIssuedAt(now)
                 .setExpiration(expiry)
-                .signWith(Keys.hmacShaKeyFor(jwtSecrets.getBytes()), SignatureAlgorithm.HS256)
+                //.signWith(Keys.hmacShaKeyFor(jwtSecrets.getBytes()), SignatureAlgorithm.HS256)
+                .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -75,9 +88,9 @@ public class JwtTokenProvider{
         * minh dat khi tao ra token -> tra ve username
         * */
         return Jwts.parserBuilder()
-                .setSigningKey(jwtSecrets.getBytes())
+                .setSigningKey(key)
                 .build()
-                .parseClaimsJwt(token)
+                .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
     }

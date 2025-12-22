@@ -1,4 +1,4 @@
-package webcamera.com.vn.webapp.DTO.client.RoleDTO_CL;
+package webcamera.com.vn.webapp.DTO.admin.PermissionDTO_AD;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RoleUpdateRequestDTO_CL {
+public class PermissionCreateRequestDTO_AD {
 
     @NotBlank(message = "name ko duoc de trong")
     @Size(min = 3, message = "name co do dai toi thieu 3 ky tu")
@@ -22,4 +22,5 @@ public class RoleUpdateRequestDTO_CL {
     @NotBlank(message = "name ko duoc de trong")
     @Size(min = 3, message = "name co do dai toi thieu 3 ky tu")
     private String guardName;
+
 }

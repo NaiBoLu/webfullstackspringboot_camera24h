@@ -1,23 +1,25 @@
-package webcamera.com.vn.webapp.controller.client;
+package webcamera.com.vn.webapp.controller.admin;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import webcamera.com.vn.webapp.DTO.client.RoleHasPermissionsDTO_CL.RoleHasPerBatchCreateRequestDTO_CL;
-import webcamera.com.vn.webapp.DTO.client.RoleHasPermissionsDTO_CL.RoleHasPerCreateRequestDTO_CL;
-import webcamera.com.vn.webapp.DTO.client.RoleHasPermissionsDTO_CL.RoleHasPerUpdateRequestDTO_CL;
-import webcamera.com.vn.webapp.service.client.RoleHasPermissionsServiceCL;
+
+import webcamera.com.vn.webapp.DTO.admin.UserHasRolesDTO_AD.UserHasRoleCreateRequestDTO_AD;
+import webcamera.com.vn.webapp.DTO.admin.UserHasRolesDTO_AD.UserHasRoleUpdateRequestDTO_AD;
+import webcamera.com.vn.webapp.DTO.admin.UserHasRolesDTO_AD.UserHasRolesBatchCreateRequestDTO_AD;
+import webcamera.com.vn.webapp.service.admin.UserHasRolesServiceAD;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/client/rolehaspermission")
-public class RoleHasPermissionControllerCL {
+@RequestMapping("/api/admin/userhasrole")
+public class UserHasRoleControllerAD {
     @Autowired
-    private RoleHasPermissionsServiceCL roleHasPermissionsServiceCL;
+    private UserHasRolesServiceAD userHasRolesServiceCL;
+
 
     //getall
     @GetMapping
@@ -25,14 +27,14 @@ public class RoleHasPermissionControllerCL {
                                                       @RequestParam(defaultValue = "3") Integer pageSize,
                                                       @RequestParam(defaultValue = "id") String sortBy){
         // goi service thuc hien truy van hien thi tat ca thong tin cua table user co phan trang
-        return roleHasPermissionsServiceCL.getAllRoleHasPermission(pageNumber, pageSize, sortBy);
+        return userHasRolesServiceCL.getAllUserHasRole(pageNumber, pageSize, sortBy);
     }
 
     //create permission
     @PostMapping("/create")
-    public ResponseEntity<Map<String, Object>> create(@Valid @RequestBody RoleHasPerCreateRequestDTO_CL objCreate){
+    public ResponseEntity<Map<String, Object>> create(@Valid @RequestBody UserHasRoleCreateRequestDTO_AD objCreate){
         try{
-            return roleHasPermissionsServiceCL.createRoleHasPermission(objCreate);
+            return userHasRolesServiceCL.createUserHasRole(objCreate);
         }catch(Exception ex){
             Map<String, Object> response = new HashMap<>();
 
@@ -44,31 +46,32 @@ public class RoleHasPermissionControllerCL {
         }
     }
 
+
     //api create batch userhasroles
     @PostMapping("/batch-create")
-    public ResponseEntity<Map<String, Object>> batchCreate(@Valid @RequestBody RoleHasPerBatchCreateRequestDTO_CL objCreate){
+    public ResponseEntity<Map<String, Object>> batchCreate(@Valid @RequestBody UserHasRolesBatchCreateRequestDTO_AD objCreate){
         try{
-            return roleHasPermissionsServiceCL.batchCreateRoleHasPermission(objCreate);
+            return userHasRolesServiceCL.batchCreateUserHasRoles(objCreate);
         }catch(Exception ex){
             Map<String, Object> response = new HashMap<>();
 
-            response.put("data",ex.getMessage());
+            response.put("data", ex.getMessage());
             response.put("statuscode",500);
-            response.put("msg","co loi kiem tra lai huhuhu");
+            response.put("msg","ngu nhu cho nhap sai nhap lai may dam may gio");
 
-            return new ResponseEntity<>(response,HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     //update pẻmission
     @PutMapping("/update/{id}")
-    public ResponseEntity<Map<String, Object>> update(@PathVariable(value = "id") Integer id, @RequestBody RoleHasPerUpdateRequestDTO_CL objUpdate){
-        return roleHasPermissionsServiceCL.updateRoleHasPermission(id, objUpdate);
+    public ResponseEntity<Map<String, Object>> update(@PathVariable(value = "id") Integer id, @RequestBody UserHasRoleUpdateRequestDTO_AD objUpdate){
+        return userHasRolesServiceCL.updateUserHasRole(id, objUpdate);
     }
 
     //delete permission
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Map<String, Object>> delete(@PathVariable(value = "id") Integer id){
-        return roleHasPermissionsServiceCL.deleteRoleHasPermission(id);
+        return userHasRolesServiceCL.deleteUserHasRole(id);
     }
 }

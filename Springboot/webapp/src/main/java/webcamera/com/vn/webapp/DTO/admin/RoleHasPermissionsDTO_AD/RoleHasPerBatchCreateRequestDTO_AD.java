@@ -1,4 +1,4 @@
-package webcamera.com.vn.webapp.DTO.client.RoleHasPermissionsDTO_CL;
+package webcamera.com.vn.webapp.DTO.admin.RoleHasPermissionsDTO_AD;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RoleHasPerBatchCreateRequestDTO_CL {
+public class RoleHasPerBatchCreateRequestDTO_AD {
     @NotNull(message = "Khong duoc de trong role id")
     private Integer roleId;
 

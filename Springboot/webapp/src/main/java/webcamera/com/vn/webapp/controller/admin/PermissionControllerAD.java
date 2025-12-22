@@ -1,24 +1,24 @@
-package webcamera.com.vn.webapp.controller.client;
+package webcamera.com.vn.webapp.controller.admin;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import webcamera.com.vn.webapp.DTO.client.PermissionDTO_CL.PermissionCreateRequestDTO_CL;
-import webcamera.com.vn.webapp.DTO.client.PermissionDTO_CL.PermissionUpdateRequestDTO_CL;
-import webcamera.com.vn.webapp.service.client.PermissionServiceCL;
+
+import webcamera.com.vn.webapp.DTO.admin.PermissionDTO_AD.PermissionCreateRequestDTO_AD;
+import webcamera.com.vn.webapp.DTO.admin.PermissionDTO_AD.PermissionUpdateRequestDTO_AD;
+import webcamera.com.vn.webapp.service.admin.PermissionServiceAD;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("api/client/permission")
-public class PermissionControllerCL {
+@RequestMapping("api/admin/permission")
+public class PermissionControllerAD {
     //goi service xu ly nau an
     @Autowired
-    private PermissionServiceCL permissionServiceCL;
+    private PermissionServiceAD permissionServiceCL;
 
     //getall
     @GetMapping
@@ -31,7 +31,7 @@ public class PermissionControllerCL {
 
     //create permission
     @PostMapping("/create")
-    public ResponseEntity<Map<String, Object>> create(@Valid @RequestBody PermissionCreateRequestDTO_CL objCreate){
+    public ResponseEntity<Map<String, Object>> create(@Valid @RequestBody PermissionCreateRequestDTO_AD objCreate){
         try{
             return permissionServiceCL.createPermission(objCreate);
         }catch(Exception ex){
@@ -47,7 +47,7 @@ public class PermissionControllerCL {
 
     //update pẻmission
     @PutMapping("/update/{id}")
-    public ResponseEntity<Map<String, Object>> update(@PathVariable(value = "id") Integer id, @RequestBody PermissionUpdateRequestDTO_CL objUpdate){
+    public ResponseEntity<Map<String, Object>> update(@PathVariable(value = "id") Integer id, @RequestBody PermissionUpdateRequestDTO_AD objUpdate){
         return permissionServiceCL.updatePermission(id, objUpdate);
     }
 

@@ -1,22 +1,23 @@
-package webcamera.com.vn.webapp.controller.client;
+package webcamera.com.vn.webapp.controller.admin;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import webcamera.com.vn.webapp.DTO.client.RoleDTO_CL.RoleCreateRequestDTO_CL;
-import webcamera.com.vn.webapp.DTO.client.RoleDTO_CL.RoleUpdateRequestDTO_CL;
-import webcamera.com.vn.webapp.service.client.RoleServiceCL;
+
+import webcamera.com.vn.webapp.DTO.admin.RoleDTO_AD.RoleCreateRequestDTO_AD;
+import webcamera.com.vn.webapp.DTO.admin.RoleDTO_AD.RoleUpdateRequestDTO_AD;
+import webcamera.com.vn.webapp.service.admin.RoleServiceAD;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/client/role")
-public class RoleController {
+@RequestMapping("/api/admin/role")
+public class RoleControllerAD {
     @Autowired
-    private RoleServiceCL roleServiceCL;
+    private RoleServiceAD roleServiceCL;
 
     //getall
     @GetMapping
@@ -29,7 +30,7 @@ public class RoleController {
 
     //create permission
     @PostMapping("/create")
-    public ResponseEntity<Map<String, Object>> create(@Valid @RequestBody RoleCreateRequestDTO_CL objCreate){
+    public ResponseEntity<Map<String, Object>> create(@Valid @RequestBody RoleCreateRequestDTO_AD objCreate){
         try{
             return roleServiceCL.createRole(objCreate);
         }catch(Exception ex){
@@ -45,7 +46,7 @@ public class RoleController {
 
     //update pẻmission
     @PutMapping("/update/{id}")
-    public ResponseEntity<Map<String, Object>> update(@PathVariable(value = "id") Integer id, @RequestBody RoleUpdateRequestDTO_CL objUpdate){
+    public ResponseEntity<Map<String, Object>> update(@PathVariable(value = "id") Integer id, @RequestBody RoleUpdateRequestDTO_AD objUpdate){
         return roleServiceCL.updateRole(id, objUpdate);
     }
 

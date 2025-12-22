@@ -151,7 +151,7 @@ export default function ProductPage() {
                     className="card-img-top my-4 "
                     src="/products/product_1.png"
                     alt="product"
-                    style={{ width: "170px", height: "170px" }}
+                    style={{ maxWidth: "170px", maxHeight: "170px" }}
                   ></Image>
                 </div>
                 <CardBody className="d-flex flex-column justify-content-between align-items-center">

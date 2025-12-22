@@ -107,7 +107,7 @@ export default function Header() {
 
       {/* //  modals form login cua  react bootstrap */}
       <Modal show={show && modalType == "loginForm"} onHide={closeModal}>
-        <Modal.Header>
+        <Modal.Header closeButton>
           <Modal.Title>Login Form</Modal.Title>
         </Modal.Header>
         <Modal.Body>

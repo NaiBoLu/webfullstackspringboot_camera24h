@@ -1,4 +1,4 @@
-package webcamera.com.vn.webapp.service.client;
+package webcamera.com.vn.webapp.service.admin;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -8,37 +8,39 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import webcamera.com.vn.webapp.DTO.client.UserHasRolesDTO_CL.UserHasRoleCreateRequestDTO_CL;
-import webcamera.com.vn.webapp.DTO.client.UserHasRolesDTO_CL.UserHasRoleUpdateRequestDTO_CL;
-import webcamera.com.vn.webapp.DTO.client.UserHasRolesDTO_CL.UserHasRolesBatchCreateRequestDTO_CL;
+
+import webcamera.com.vn.webapp.DTO.admin.RoleHasPermissionsDTO_AD.RoleHasPerBatchCreateRequestDTO_AD;
+import webcamera.com.vn.webapp.DTO.admin.RoleHasPermissionsDTO_AD.RoleHasPerCreateRequestDTO_AD;
+import webcamera.com.vn.webapp.DTO.admin.RoleHasPermissionsDTO_AD.RoleHasPerUpdateRequestDTO_AD;
+import webcamera.com.vn.webapp.entity.Permission;
 import webcamera.com.vn.webapp.entity.Role;
+import webcamera.com.vn.webapp.entity.RoleHasPermissions;
 import webcamera.com.vn.webapp.entity.User;
-import webcamera.com.vn.webapp.entity.UserHasRoles;
+import webcamera.com.vn.webapp.repository.PermissionRepository;
+import webcamera.com.vn.webapp.repository.RoleHasPermissionRepository;
 import webcamera.com.vn.webapp.repository.RoleRepository;
-import webcamera.com.vn.webapp.repository.UserHasRolesRepository;
-import webcamera.com.vn.webapp.repository.UserRepository;
 
 import java.util.*;
 
 @Service
-public class UserHasRolesServiceCL {
+public class RoleHasPermissionsServiceAD {
     @Autowired
-    private UserHasRolesRepository userHasRolesRepo;
-
-    @Autowired
-    private UserRepository userRepo;
+    private RoleHasPermissionRepository roleHasPermissionRepo;
 
     @Autowired
     private RoleRepository roleRepo;
 
+    @Autowired
+    private PermissionRepository permissionRepo;
+
     //getall co phan trang
-    public ResponseEntity<Map<String, Object>> getAllUserHasRole(Integer pageNumber, Integer pageSize, String sortBy){
+    public ResponseEntity<Map<String, Object>> getAllRoleHasPermission(Integer pageNumber, Integer pageSize, String sortBy){
         // tao response luu ket qua tra ve
         Map<String, Object> response = new HashMap<>();
 
         //xu ly phan trang
         Pageable pageable = PageRequest.of(pageNumber -1, pageSize, Sort.by(sortBy)); // yeu cau
-        Page<UserHasRoles> pageResult = userHasRolesRepo.findAll(pageable); // goi repo lay ket qua tat ca
+        Page<RoleHasPermissions> pageResult = roleHasPermissionRepo.findAll(pageable); // goi repo lay ket qua tat ca
 
         //neu co noi dung
         if(pageResult.hasContent()){
@@ -65,29 +67,24 @@ public class UserHasRolesServiceCL {
         }
     }
 
-    /*II - 0: Post(create)*/
-    public ResponseEntity<Map<String, Object>> createUserHasRole(UserHasRoleCreateRequestDTO_CL objcreate ){
+    /*II - Post(create)*/
+    public ResponseEntity<Map<String, Object>> createRoleHasPermission(RoleHasPerCreateRequestDTO_AD objcreate ){
         //response luu ket qua tra ve
         Map<String, Object> response = new HashMap<>();
 
         //c-1 khoi tao UserEntity
-        UserHasRoles newEntity = new UserHasRoles();
+        RoleHasPermissions newEntity = new RoleHasPermissions();
 
-        /*cach viet cu khi khong dung annotation lk khoa ngoai: OneTOMany, ManyToOne...*/
-//        newEntity.setUserId(objcreate.getUserId());
-//        newEntity.setRoleId(objcreate.getRoleId());
-
-        /*cach viet moi khi co dung lk khoa ngoai: OneTOMany, ManyToOne...*/
-        User user = userRepo.findById(objcreate.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
         Role role = roleRepo.findById(objcreate.getRoleId())
-                        .orElseThrow(() -> new RuntimeException("Role not found"));
+                .orElseThrow(() -> new RuntimeException("Role not found"));
+        Permission permission = permissionRepo.findById(objcreate.getPermissionId())
+                .orElseThrow(() -> new RuntimeException("Permission not found"));
 
-        newEntity.setUser(user);
         newEntity.setRole(role);
+        newEntity.setPermission(permission);
 
         //nhờ repo luu lại vào db
-        UserHasRoles createEntity = userHasRolesRepo.save(newEntity);
+        RoleHasPermissions createEntity = roleHasPermissionRepo.save(newEntity);
 
         //c-4 tra ve ket qua cho nguoi dung theo chuan restfullAPI
         response.put("data",createEntity);
@@ -97,63 +94,55 @@ public class UserHasRolesServiceCL {
         return new ResponseEntity<>(response,HttpStatus.CREATED);
     }
 
-
-    /*II - 1: Post(create batch nhieu role cho user)*/
-    public ResponseEntity<Map<String, Object>> batchCreateUserHasRoles(UserHasRolesBatchCreateRequestDTO_CL objCreate){
-        // tao map response luu tru
+    /*II - 1: Post(create batch nhieu permissions cho role)*/
+    public ResponseEntity<Map<String, Object>> batchCreateRoleHasPermission(RoleHasPerBatchCreateRequestDTO_AD objCreate){
+        //tao response luu ket qua tra ve
         Map<String, Object> response = new HashMap<>();
 
         //goiu repository create nhieu role cho mot user
-        List<UserHasRoles> listCreateEmtoty = new ArrayList<>();
+        List<RoleHasPermissions> listCreateEntity = new ArrayList<>();
         try{
-            for(Integer roleId : objCreate.getListRoleId()){
-                UserHasRoles userHasRoles = new UserHasRoles();
+            for(Integer permissionId : objCreate.getPermissionId()){
+                RoleHasPermissions roleHasPermissions = new RoleHasPermissions();
 
-                User user = userRepo.findById(objCreate.getUserId())
-                        .orElseThrow(() -> new RuntimeException("User not found"));
-                Role role = roleRepo.findById(roleId)
+                Role role = roleRepo.findById(objCreate.getRoleId())
                         .orElseThrow(() -> new RuntimeException("Role not found"));
+                Permission permission = permissionRepo.findById(permissionId)
+                        .orElseThrow(() -> new RuntimeException("Permission not found"));
 
-                userHasRoles.setUser(user);
-                userHasRoles.setRole(role);
+                roleHasPermissions.setRole(role);
+                roleHasPermissions.setPermission(permission);
 
-                userHasRolesRepo.save(userHasRoles);
-                listCreateEmtoty.add(userHasRoles);
+                roleHasPermissionRepo.save(roleHasPermissions);
+                listCreateEntity.add(roleHasPermissions);
             }
-        } catch (Exception e) {
-            throw e;
+        }catch(Exception ex){
+            throw ex;
         }
 
         //tra ve ket qua chuan rest full api
-        response.put("data", listCreateEmtoty);
-        response.put("statuscode", 201);
-        response.put("msg", "create thanh cong");
+        response.put("data",listCreateEntity);
+        response.put("statuscode",201);
+        response.put("msg","create thanh cong oh yeah");
 
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        return new ResponseEntity<>(response,HttpStatus.OK);
     }
 
 
     //update
-    public ResponseEntity<Map<String, Object>> updateUserHasRole(Integer id, UserHasRoleUpdateRequestDTO_CL objUpdate){
+    public ResponseEntity<Map<String, Object>> updateRoleHasPermission(Integer id, RoleHasPerUpdateRequestDTO_AD objUpdate){
         //tao response luu ket qua tra ve
         Map<String, Object> response = new HashMap<>();
 
         //tim kiem entity theo id
-        Optional<UserHasRoles> optFound = userHasRolesRepo.findById(id);
+        Optional<RoleHasPermissions> optFound = roleHasPermissionRepo.findById(id);
 
         //neu tim thay thi lay ra update
         if(optFound.isPresent()){
             //lay entity ra khoi hop qua opt
-            UserHasRoles entityEdit = optFound.get();
+            RoleHasPermissions entityEdit = optFound.get();
 
             //kiem tra va cap nha cac truong tt null hoawc empty -> tien hanh bo qua va ghi nhan
-            if(objUpdate.getUserId() != null ){
-               User user = userRepo.findById(objUpdate.getUserId())
-                       .orElseThrow(() -> new RuntimeException("New userid not found"));
-
-                 // capnhat goi tuong entity userid
-                entityEdit.setUser(user);
-            }
             if(objUpdate.getRoleId() != null){
                 Role role = roleRepo.findById(objUpdate.getRoleId())
                         .orElseThrow(() -> new RuntimeException("New roleid not found"));
@@ -161,10 +150,16 @@ public class UserHasRolesServiceCL {
                 // capnhat goi tuong entity userid
                 entityEdit.setRole(role);
             }
+            if(objUpdate.getPermissionId() != null ){
+                Permission permission = permissionRepo.findById(objUpdate.getPermissionId())
+                        .orElseThrow(() -> new RuntimeException("New permissionid not found"));
 
+                // capnhat goi tuong entity userid
+                entityEdit.setPermission(permission);
+            }
 
             //goi repoluu lai cap nhat
-            UserHasRoles updatedEntity = userHasRolesRepo.save(entityEdit);
+            RoleHasPermissions updatedEntity = roleHasPermissionRepo.save(entityEdit);
 
             //goi response tra ve ket qua
             response.put("data",updatedEntity);
@@ -184,20 +179,20 @@ public class UserHasRolesServiceCL {
     }
 
     //delete xoa
-    public ResponseEntity<Map<String, Object>> deleteUserHasRole(Integer id){
+    public ResponseEntity<Map<String, Object>> deleteRoleHasPermission(Integer id){
         //tao response luu ket qua tra ve
         Map<String,Object> response = new HashMap<>();
 
         //tim theo id
-        Optional<UserHasRoles> optFound = userHasRolesRepo.findById(id);
+        Optional<RoleHasPermissions> optFound = roleHasPermissionRepo.findById(id);
 
         //neu tim thay thi xoa
         if(optFound.isPresent()){
             //lay entity ra khoi hop qua opt
-            UserHasRoles deleteEntity = optFound.get();
+            RoleHasPermissions deleteEntity = optFound.get();
 
             //goi repo xoa entity
-            userHasRolesRepo.delete(deleteEntity);
+            roleHasPermissionRepo.delete(deleteEntity);
 
             //goi response luu ket qua tra ve
             response.put("data",null);
@@ -214,4 +209,5 @@ public class UserHasRolesServiceCL {
             return new ResponseEntity<>(response,HttpStatus.NOT_FOUND);
         }
     }
+
 }
