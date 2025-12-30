@@ -20,6 +20,7 @@ public class RoleControllerAD {
     private RoleServiceAD roleServiceCL;
 
     //getall
+    @CrossOrigin(origins = "http://localhost:3000")
     @GetMapping
     public ResponseEntity<Map<String, Object>> getAll(@RequestParam(defaultValue = "1") Integer pageNumber,
                                                       @RequestParam(defaultValue = "3") Integer pageSize,
@@ -29,6 +30,7 @@ public class RoleControllerAD {
     }
 
     //create permission
+    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/create")
     public ResponseEntity<Map<String, Object>> create(@Valid @RequestBody RoleCreateRequestDTO_AD objCreate){
         try{
@@ -45,12 +47,14 @@ public class RoleControllerAD {
     }
 
     //update pẻmission
+    @CrossOrigin(origins = "http://localhost:3000")
     @PutMapping("/update/{id}")
     public ResponseEntity<Map<String, Object>> update(@PathVariable(value = "id") Integer id, @RequestBody RoleUpdateRequestDTO_AD objUpdate){
         return roleServiceCL.updateRole(id, objUpdate);
     }
 
     //delete permission
+    @CrossOrigin(origins = "http://localhost:3000")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Map<String, Object>> delete(@PathVariable(value = "id") Integer id){
         return roleServiceCL.deleteRole(id);

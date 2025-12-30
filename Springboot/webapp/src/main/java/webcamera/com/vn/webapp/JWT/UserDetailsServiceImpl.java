@@ -46,7 +46,7 @@ public class UserDetailsServiceImpl implements UserDetailsService{
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
        webcamera.com.vn.webapp.entity.User user = userRepo.findByUsernameWithRoles(username);
        if(user == null || user.getUsername() == null){
-        new UsernameNotFoundException("Username khong tim thay");
+        throw new UsernameNotFoundException("Username khong tim thay");
        }
 
 

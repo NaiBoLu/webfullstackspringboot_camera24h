@@ -17,12 +17,16 @@ package webcamera.com.vn.webapp.JWT;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.util.Collection;
 import java.util.Date;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtTokenProvider{
@@ -43,10 +47,15 @@ public class JwtTokenProvider{
     private final Key key = Keys.hmacShaKeyFor(JWT_SECRET.getBytes(StandardCharsets.UTF_8));
 
     /*encode - tao  sinh ra token(tao ra token voi dinh dang da ma hoa encrypt)*/
-    public String generateToken(String username){
+    public String generateToken(String username, Collection<? extends GrantedAuthority> authorities){
         //1. tao thoi gian song cho no - thoi gian het han  token tu khi sinh ra
         Date now  = new  Date();
         Date expiry = new Date(now.getTime() + 86400000); //hieu ms -> quy doi  tat ca time thanh ms(24*60*60*1000 = ms)
+
+        //tao mot chuoi danh sach role tu collection authorities
+        String roles = authorities.stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
 
         /*giai thich code:
         *  -> builder: tien khoi tao
@@ -62,6 +71,7 @@ public class JwtTokenProvider{
        */
         return Jwts.builder()
                 .setSubject(username)
+                .claim("role", roles) //them dong nay de luu role cua user vao trong payload cua token
                 .setIssuedAt(now)
                 .setExpiration(expiry)
                 //.signWith(Keys.hmacShaKeyFor(jwtSecrets.getBytes()), SignatureAlgorithm.HS256)

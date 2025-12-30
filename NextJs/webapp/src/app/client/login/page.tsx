@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 
 //import lib fontawesome
@@ -9,12 +9,59 @@ import { faGoogle } from "@fortawesome/free-brands-svg-icons";
 //import xu ly an/hien passowrd qua icon con mat
 import PasswordInput from "@/components/client/passwordInput";
 
-import { redirect } from "next/navigation";
+//import axiosAuth vaof trong form login cua route client
+import { login } from "@/axios/axiosAuth";
+
+//import userRouter dieu trang
+import { useRouter } from "next/navigation";
+
+//import modal context vao su dung
+import { useModal } from "@/contexts/ModalContext";
+
+//import toastContext vao nha
+import { useToast } from "@/contexts/ToastContext";
 
 export default function Login() {
   //state trang thai
   const [username, setUsername] = React.useState("");
   const [password, setPassword] = React.useState("");
+
+  //khoi tao userRouter
+  const router = useRouter();
+  //khoi tao toast context
+  const { showToast } = useToast();
+
+  //khoi tao modal context
+  const { closeModal } = useModal();
+  //state ghi nhan trang thai dang nhap cua nguoi dung khi nhan button login
+  const [isLoading, setIsLoading] = useState(false);
+
+  /* method hanh dong xu ly dang nhap cho form login */
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    //ngan chan hanh vi macj dinh cua form
+    e.preventDefault();
+    setIsLoading(true); //ghi nhan trang thai la dang load
+    try {
+      //1. goi api axiosAuth login vao
+      const token = await login(username, password);
+
+      //show context bao thanh cong
+      showToast("Login thanh cong", "success");
+
+      //closeMOdal
+      closeModal();
+
+      //2.lam moi lai trang de cap nhat lai giao dien
+      router.refresh();
+    } catch (error: any) {
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "login co van de xme lai oh yead.";
+      //show toat context:
+      showToast(errorMessage, "danger");
+    }
+  };
 
   return (
     <>
@@ -45,7 +92,7 @@ export default function Login() {
           </div>
 
           {/* form đk sự kiện */}
-          <form>
+          <form onSubmit={handleSubmit}>
             <div className="mb-3">
               <label htmlFor="username" className="form-label">
                 Email Address
@@ -56,6 +103,7 @@ export default function Login() {
                 id="username"
                 placeholder="nhập username đăng nhập"
                 required
+                value={username}
                 //kích hoạt sự kiện onchange ghi nhận value thay đổi khi nhập input
                 onChange={(e) => setUsername(e.target.value)}
               />
@@ -66,7 +114,10 @@ export default function Login() {
               </label>
 
               {/* nut password : co icon con mat an hien password  */}
-              <PasswordInput />
+              <PasswordInput
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
             </div>
 
             <div className="d-flex justify-content-between align-items-center mb-3">
@@ -90,8 +141,9 @@ export default function Login() {
               type="submit"
               className="btn btn-primary w-100 mb-3"
               style={{ fontWeight: 500 }}
+              disabled={isLoading} // ngan nhan nut khi dang load: bao hieu la dang loading
             >
-              Log in
+              {isLoading ? "Logging in..." : "Log In"}
             </button>
           </form>
 

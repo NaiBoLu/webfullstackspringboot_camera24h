@@ -1,6 +1,7 @@
 package webcamera.com.vn.webapp.service.client;
 
 
+import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,9 +18,13 @@ import org.springframework.web.multipart.MultipartFile;
 import webcamera.com.vn.webapp.DTO.admin.UserDTO_AD.UserUpdateRequestDTO_AD;
 import webcamera.com.vn.webapp.DTO.client.UserDTO_CL.UserCreateRequestDTO_CL;
 import webcamera.com.vn.webapp.DTO.client.UserDTO_CL.UserUpdateRequestDTO_CL;
+import webcamera.com.vn.webapp.entity.Role;
 import webcamera.com.vn.webapp.entity.User;
+import webcamera.com.vn.webapp.entity.UserHasRoles;
 import webcamera.com.vn.webapp.exceptions.ValidationErrorResponse;
 import webcamera.com.vn.webapp.exceptions.Violations;
+import webcamera.com.vn.webapp.repository.RoleRepository;
+import webcamera.com.vn.webapp.repository.UserHasRolesRepository;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,6 +46,11 @@ public class UserServiceCL {
 
     @Autowired
     private webcamera.com.vn.webapp.repository.UserRepository userRepo;
+    @Autowired
+    private UserHasRolesRepository userHasRoleRepo;
+    @Autowired
+    private RoleRepository roleRepo;
+
 
     /*tao bien string lay url cau hinh luu file da thiet lap ben application.properties
     * @Value: annotation dc su dung de gan gia tri cho mot bien tu cac nguon:
@@ -92,7 +102,10 @@ public class UserServiceCL {
 
 
     /*II - Post(create)*/
-    //MultipartFile: la mot interface trong spring, dc su dung de xu ly cac tep files -> dc upload thog qua giao thuc HTTP request
+    //MultipartFile: la mot interface trong spring, dc su dung de xu ly cac tep files -> dc upload thog qua giao thuc HTTP request 
+    //Nếu bạn không dùng @Transactional: Chẳng may bạn tạo xong User rồi, nhưng đến đoạn tìm Role ID 3 bị lỗi (hoặc quên chưa lưu), hệ thống sẽ có một "User ma" — tức là có tài khoản nhưng không có quyền gì cả, dẫn đến lỗi khi đăng nhập sau này.
+    //Nếu bạn có @Transactional: Nếu việc lưu Role bị lỗi, Spring sẽ tự động "xóa" luôn thằng User vừa tạo trước đó để đảm bảo dữ liệu trong Database luôn sạch sẽ, đúng cặp đúng cặp.
+    @Transactional 
     public ResponseEntity<Map<String, Object>> createUser(UserCreateRequestDTO_CL objCreate){
         //a - khoi tao bien response de luu tru ket qua tra ve
         Map<String, Object> response = new HashMap<>();
@@ -136,6 +149,7 @@ public class UserServiceCL {
             //c-1 khoi tao UserEntity
             User newEntity = new User();
             newEntity.setUsername(objCreate.getUsername());
+         
 
             //xử ly mahoa matkhau theo chuan bcrypt thanh ma bam (hash) bao mat thong tin
             BCryptPasswordEncoder endCoder = new BCryptPasswordEncoder(); //xu ly mat 
@@ -157,6 +171,17 @@ public class UserServiceCL {
                 throw new ConstraintViolationException("Ten ban dang ky da ton tai vui long chon ten khac hahaaha", null);
             }else{
                 User createEntity = userRepo.save(newEntity);
+
+                //tạo role mặc định cho user phải lưu lại ms có id
+                UserHasRoles newRole = new UserHasRoles();
+                 //lấy role từ db
+                Role defaultRole = roleRepo.findById(3).orElseThrow(() -> new RuntimeException("Role không tồn tại lol"));
+
+                newRole.setUser(createEntity);
+                newRole.setRole(defaultRole);
+
+                //lưu lại vào userhasrole
+                userHasRoleRepo.save(newRole);
 
                 //c-4 tra ve ket qua cho nguoi dung theo chuan restfullAPI
                 response.put("data", createEntity);

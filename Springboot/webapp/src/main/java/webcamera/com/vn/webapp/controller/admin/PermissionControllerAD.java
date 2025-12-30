@@ -21,6 +21,7 @@ public class PermissionControllerAD {
     private PermissionServiceAD permissionServiceCL;
 
     //getall
+    @CrossOrigin(origins = "http://localhost:3000")
     @GetMapping
     public ResponseEntity<Map<String, Object>> getAll(@RequestParam(defaultValue = "1") Integer pageNumber,
                                                       @RequestParam(defaultValue = "3") Integer pageSize,
@@ -30,6 +31,7 @@ public class PermissionControllerAD {
     }
 
     //create permission
+    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/create")
     public ResponseEntity<Map<String, Object>> create(@Valid @RequestBody PermissionCreateRequestDTO_AD objCreate){
         try{
@@ -46,12 +48,14 @@ public class PermissionControllerAD {
     }
 
     //update pẻmission
+    @CrossOrigin(origins = "http://localhost:3000")
     @PutMapping("/update/{id}")
     public ResponseEntity<Map<String, Object>> update(@PathVariable(value = "id") Integer id, @RequestBody PermissionUpdateRequestDTO_AD objUpdate){
         return permissionServiceCL.updatePermission(id, objUpdate);
     }
 
     //delete permission
+    @CrossOrigin(origins = "http://localhost:3000")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Map<String, Object>> delete(@PathVariable(value = "id") Integer id){
         return permissionServiceCL.deletePermission(id);

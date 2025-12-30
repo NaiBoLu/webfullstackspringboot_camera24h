@@ -14,6 +14,7 @@ import webcamera.com.vn.webapp.service.client.UserServiceCL;
 
 import java.util.Map;
 
+
 @RestController
 @RequestMapping("api/client/users")
 public class UserControllerCL {
@@ -22,6 +23,7 @@ public class UserControllerCL {
     private UserServiceCL userServiceCL;
 
     /*************1- getall**********************/
+    @CrossOrigin(origins = "http://localhost:3000")
     @GetMapping
     public ResponseEntity<Map<String, Object>> index(@RequestParam(defaultValue = "1") Integer pageNumber,
                                                      @RequestParam(defaultValue = "3") Integer pageSize,
@@ -31,6 +33,7 @@ public class UserControllerCL {
     }
 
     /*****************-2 create**************************/
+    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/create")
     public ResponseEntity<Map<String, Object>> create(@Valid @RequestBody UserCreateRequestDTO_CL objCreate){
         return userServiceCL.createUser(objCreate);
@@ -38,12 +41,14 @@ public class UserControllerCL {
 
 
    /********************3 - delete**********************************/
+  @CrossOrigin(origins = "http://localhost:3000")
    @DeleteMapping("/delete/{id}")
    public ResponseEntity<Map<String, Object>> delete(@PathVariable Integer id){
        return userServiceCL.deleteUsre(id);
    }
 
    /*********************4- update**************************************/
+  @CrossOrigin(origins = "http://localhost:3000")
    @PutMapping("/update/{id}")
    public ResponseEntity<Map<String, Object>> update(@PathVariable Integer id,
                                                      @RequestParam(value = "file", required = false) MultipartFile file,

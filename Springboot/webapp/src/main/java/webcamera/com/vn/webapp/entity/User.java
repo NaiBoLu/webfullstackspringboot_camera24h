@@ -84,9 +84,17 @@ public class User {
      *     select * from users u
      *     join user_has_roles uhr on uhr.user_id = u.id
      *     join roles r on r.role_id = u.id
-     *      where..<dk can xet>   
+     *      where..<dk can xet>
+     * (fetch = FetchType.EAGER): Trong file UserDetailsServiceImpl, bạn thực hiện logic này:
+        Lấy User từ Database.
+        Dùng stream() trên getListRoles() để nạp vào JWT.
+        Nếu là LAZY, danh sách Role lúc đó giống như một cái "hộp rỗng" chờ được đổ đầy. Nhưng vì quy trình tạo JWT diễn ra rất nhanh, Hibernate chưa kịp đổ dữ liệu vào hộp thì Token đã ký xong mất rồi. Kết quả là "role": "".
+        Khi bạn đổi sang EAGER:
+        Câu lệnh SQL của bạn từ SELECT * FROM users sẽ biến thành một câu lệnh JOIN hoành tráng: SELECT * FROM users JOIN user_has_roles JOIN roles...
+        Dữ liệu Role được nạp ngay lập tức vào đối tượng User.
+        JWT bốc được dữ liệu thật và hiện ra chữ "role": "customer"   
      * ****/
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER) // Đổi từ mặc định sang EAGER
     @JoinTable(name = "user_has_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))

@@ -6,7 +6,10 @@ import { useReducer, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 
-export default function PasswordInput() {
+//goi kieu types cho PasswordInput vao day
+import { PasswordInputTypes } from "@/types/PasswordInputTypes";
+
+export default function PasswordInput({ value, onChange }: PasswordInputTypes) {
   const [showPassword, setShowPassword] = useState(false);
 
   /*
@@ -35,6 +38,8 @@ export default function PasswordInput() {
           className="form-control"
           placeholder="Nhập mật khẩu"
           required
+          value={value} //nhan tu doi so ma component cha truyn props vao component con
+          onChange={onChange} //nhan tu doi so ma component cha truyn props vao component con
         />
         <span onClick={togglePassword} className="toggle-password">
           {showPassword == true && (

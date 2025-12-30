@@ -8,7 +8,7 @@ collate utf8mb4_unicode_ci;
 -- 2 usse database moi su dung dc
 use webapp_camera24h;
 
-select * from users;
+select * from users; 
 select * from roles;
 select * from user_has_roles;
 
@@ -187,7 +187,7 @@ select * from roles;
 
 -- INSERT INTO users (name, username, password, gender, email, birthday, level_id, phone, is_active, created_at, updated_at) VALUES
 -- ('Nguyễn Văn A', 'vana', 'e10adc3949ba59abbe56e057f20f883e', 1, 'vana@example.com', '1995-05-15', 1, '0901112222', TRUE, NOW(), NOW());
--- tai khoan admin: tai - Admin123#
+-- tai khoan admin: tai - Admin123# 
 
 INSERT INTO roles (name, display_name, guard_name, created_at, updated_at) VALUES
 ('admin', 'Quản trị viên Hệ thống', 'web', NOW(), NOW()),

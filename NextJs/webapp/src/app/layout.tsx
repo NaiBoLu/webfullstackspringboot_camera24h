@@ -15,8 +15,9 @@ import { config } from "@fortawesome/fontawesome-svg-core";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 config.autoAddCss = false;
 
-//import modal context dung cho global toan du an
+//import modal context va ToastContext dung cho global toan du an
 import { ModalProvider } from "@/contexts/ModalContext";
+import ToastProvider from "@/contexts/ToastContext";
 import BackToTop from "@/components/client/BackToTop";
 
 const geistSans = Geist({
@@ -42,7 +43,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <ModalProvider>{children}</ModalProvider>
+        <ToastProvider>
+          <ModalProvider>{children}</ModalProvider>
+        </ToastProvider>
         <BackToTop></BackToTop>
       </body>
     </html>
