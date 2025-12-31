@@ -10,7 +10,17 @@ use webapp_camera24h;
 
 select * from users; 
 select * from roles;
+select * from permisions;
 select * from user_has_roles;
+select * from role_has_permissions;
+
+select distinct 
+		u.username, p.name, p.display_name
+from user_has_roles uhr
+join users u on uhr.user_id = u.id
+join role_has_permissions rhp on rhp.role_id = uhr.role_id
+join permisions p on rhp.permission_id = p.id
+where u.username = 'tai';
 
 -- 3 tien hanh tao table csdl 
 -- #1 table users
