@@ -46,7 +46,6 @@ export default function RootLayout({
         <ToastProvider>
           <ModalProvider>{children}</ModalProvider>
         </ToastProvider>
-        <BackToTop></BackToTop>
       </body>
     </html>
   );

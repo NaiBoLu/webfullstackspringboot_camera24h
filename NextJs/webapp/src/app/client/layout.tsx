@@ -21,6 +21,7 @@ export default function RootClientLayout({
 
       {/* phan footer */}
       <Footer />
+      <BackToTop></BackToTop>
     </>
   );
 }
