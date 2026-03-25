@@ -8,11 +8,17 @@ collate utf8mb4_unicode_ci;
 -- 2 usse database moi su dung dc
 use webapp_camera24h;
 
+-- lenh tat kiem tra khoa ngoai: luu y trang thai 0 la tat kiem tra khoa ngoai, con trang thai 1 la bat ktra khoa ngoai
+set foreign_key_checks = 0;
+
 select * from users; 
 select * from roles;
 select * from permisions;
 select * from user_has_roles;
 select * from role_has_permissions;
+select * from salary_levels;
+
+-- select * from users where email="kingofgirls98@gmail.com" and active_code = "1699eb25-738d-4010-9db1-787ac499c155"; 
 
 select distinct 
 		u.username, p.name, p.display_name
@@ -43,6 +49,7 @@ create table users(
  created_at timestamp,
  updated_at timestamp
 );
+
 
 -- # create table roles
 create table roles(

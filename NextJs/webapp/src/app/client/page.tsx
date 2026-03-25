@@ -101,7 +101,7 @@ export default function HomePage() {
                 className="me-5"
               />
               <div>
-                <h5 className="fw-bold mb-4 ">You’re Safe With Us</h5>
+                <h5 className="fw-bold mb-4">You’re Safe With Us</h5>
                 <p className="text-muted fs-6 fw-semi-bold">
                   Our secure payment system accepts the most common forms of
                   payments making the checkout process quicker! The payments we

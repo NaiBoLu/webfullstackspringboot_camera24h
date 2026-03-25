@@ -59,6 +59,8 @@ public class JwtFilter  extends OncePerRequestFilter {
             || path.startsWith("/v3/api-docs/")
             || path.startsWith("/api/auth/login")
             || path.startsWith("/uploads/")
+            || path.startsWith("/api/client/users/create")
+            || path.startsWith("/api/client/users/active-account")
             ){        
                 filterChain.doFilter(request, response);
                 return;
@@ -99,7 +101,7 @@ public class JwtFilter  extends OncePerRequestFilter {
 
             //kiem tra xem token valid khong?
             if(jwtProvider.isTokenValid(jwt, userDetails)){
-                //taoj authentication dat vao securitycontext(kiem tra userco ton tai khong hop le khong va co role, per gi -> di tiep or khong?)
+                //taoj authentication dat vao securitycontext(kiem tra user co ton tai khong hop le khong va co role, per gi -> di tiep or khong?)
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,null, userDetails.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }

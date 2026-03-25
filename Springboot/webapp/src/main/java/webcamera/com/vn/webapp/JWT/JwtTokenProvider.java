@@ -94,7 +94,7 @@ public class JwtTokenProvider{
         *   --> neu ma token khong hop le(het han, chu ky sai) no se nem ra ngoai loi va kethuc qua trinh nay
         *
         * -> getBody(): lay ra phan payload cua token, de lay ra thong tin can lay dc dc ma hoa(user...)
-        * -> etSubject(): trich xuat gia tri cua claim subject tu payload, gia tri nay chinh la thong tin username ma
+        * -> getSubject(): trich xuat gia tri cua claim subject tu payload, gia tri nay chinh la thong tin username ma
         * minh dat khi tao ra token -> tra ve username
         * */
         return Jwts.parserBuilder()

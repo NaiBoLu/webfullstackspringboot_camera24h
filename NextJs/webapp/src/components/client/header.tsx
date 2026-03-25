@@ -93,11 +93,21 @@ export default function Header() {
 
       //lay thong tin tong hop tu token va avatar , user_id tu localstorage de hien thi len giao dien
       const roles = getPayloadInfoFromToken();
-      if (roles) {
+      if (roles && token) {
+        setIsLoggedIn(true);
         setUserRole(roles);
         setAvatar(saveAvatar);
         setUserId(saveId);
       } else {
+        //truowng hop: khong co toekn hoac token het han
+        if (token) {
+          //co token ma het han
+          localStorage.removeItem("token");
+          localStorage.removeItem("avatar");
+          localStorage.removeItem("userId");
+          setIsLoggedIn(false);
+        }
+        setIsLoggedIn(false);
         setUserRole(null);
         setAvatar(null);
         setUserId(null);
@@ -121,6 +131,10 @@ export default function Header() {
       closeModal();
     }
   }, [pathName]);
+
+  /***ham kiem tra role la admin/cashier de bat tat url sang trang admin page***/
+  const canAccessAdminPage =
+    userRole?.includes("admin") || userRole?.includes("cashier");
 
   return (
     <>
@@ -187,14 +201,18 @@ export default function Header() {
                   <DropdownMenu>
                     <DropdownItem href="/">Profile</DropdownItem>
                     <DropdownItem onClick={handleLogout}>Logout</DropdownItem>
-                    <DropdownItem href="/">Admin page</DropdownItem>
+
+                    {/* DIEU KIEN QUAN TRONG: CHI HIEN ADMINPAGE NEU ROLE LA ADMIN HOAC CASHIER */}
+                    {canAccessAdminPage && (
+                      <DropdownItem href="/admin">Admin page</DropdownItem>
+                    )}
                   </DropdownMenu>
                 </Dropdown>
               )}
             </Nav>
           </NavbarCollapse>
         </Container>
-      </Navbar>
+      </Navbar>p
 
       {/* //  modals form login cua  react bootstrap */}
       <Modal show={show && modalType == "loginForm"} onHide={closeModal}>

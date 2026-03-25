@@ -1,5 +1,7 @@
 package webcamera.com.vn.webapp.repository;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -34,4 +36,15 @@ public interface UserRepository  extends CrudRepository<User, Integer>,
             WHERE u.username = :username    
             """)
         User findByUsernameWithRoles(String username);
+
+
+        /**method nay la cau lenh sqp thuc hien truy van table users trong database theo dk la email dang ky
+         * va active_code phai ton tai va khop: thi moi hop le
+         * <=> ung voi cau lenh sql ben mysql
+         *   select * from users where email="kingofgirls98@gmail.com" and active_code = "1699eb25-738d-4010-9db1-787ac499c155"; 
+         * 
+         * nghia la method repository  nay no the hien cau sql tren va tra ve doi tuong user neu tim thay
+         * neu khong tim thay thi no
+         ***/
+        Optional<User> findByEmailAndActiveCode( String email, String activeCode);
 }

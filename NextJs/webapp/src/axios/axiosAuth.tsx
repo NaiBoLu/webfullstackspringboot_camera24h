@@ -1,10 +1,11 @@
 /* CẤU HÌNH AXIOS CHO PHẦN XỬ LÝ AUTHENTICATION */
 import { jwtDecode } from "jwt-decode";
+import { AUTH_URL } from "@/constants/urls";
 
-//import jwtdecode giai ma token
+//import jwtdecode giai ma token sao ko thay chu
 
 export async function login(username: string, password: string) {
-  const response = await fetch("http://localhost:8080/api/auth/login", {
+  const response = await fetch(`${AUTH_URL} `, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -48,7 +49,16 @@ export function getPayloadInfoFromToken() {
     if (!token) return null;
     try {
       const decoded: any = jwtDecode(token);
-      //gia su backen ban luu key la 'roles' hoac role trong payload thi deu lay dc
+
+      //kiem tra token het han chua
+      const currentTime = Date.now() / 1000; //doi sang giay
+      if (decoded.exp < currentTime) {
+        //token het han
+        console.warn("Token has expired");
+        return null;
+      }
+
+      //gia su backend luwu key la 'roles' hoac 'role' trong payload
       return decoded.roles || decoded.role || null;
     } catch (error) {
       console.error("Invalid token:", error);

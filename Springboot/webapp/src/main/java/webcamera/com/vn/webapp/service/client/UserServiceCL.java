@@ -25,6 +25,7 @@ import webcamera.com.vn.webapp.exceptions.ValidationErrorResponse;
 import webcamera.com.vn.webapp.exceptions.Violations;
 import webcamera.com.vn.webapp.repository.RoleRepository;
 import webcamera.com.vn.webapp.repository.UserHasRolesRepository;
+import webcamera.com.vn.webapp.service.aouth.EmailService;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,6 +37,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -50,6 +52,8 @@ public class UserServiceCL {
     private UserHasRolesRepository userHasRoleRepo;
     @Autowired
     private RoleRepository roleRepo;
+    @Autowired
+    private EmailService emailService;
 
 
     /*tao bien string lay url cau hinh luu file da thiet lap ben application.properties
@@ -59,6 +63,8 @@ public class UserServiceCL {
     * */
     @Value("${file.upload-dir}")
     private String uploadDir;
+
+
 
     /*I - GET ->lay va do du lieu co phan trang*/
     public ResponseEntity<Map<String, Object>> getAllUserPagination(int pageNumber, int pageSize, String sortby){
@@ -156,9 +162,14 @@ public class UserServiceCL {
             newEntity.setPassword(endCoder.encode(objCreate.getPassword()));
 
             newEntity.setGender(1);
+            newEntity.setEmail(objCreate.getEmail());
             //lk khoa ngoai cua table salary_level
             newEntity.setLevelId(7);
-            newEntity.setIsActive(1);
+            newEntity.setIsActive(0);
+
+            /*tao khoa bi mat de lam ma active code -> khi x/n gmail  */
+            UUID uuid= UUID.randomUUID();
+            newEntity.setActiveCode(uuid.toString());
 
            // c-2 yeu cau repository luu lai khoi tao tren
             // thuc hien
@@ -183,6 +194,19 @@ public class UserServiceCL {
                 //lưu lại vào userhasrole
                 userHasRoleRepo.save(newRole);
 
+                /*****start - xu ly xac nhan email khi dang ky crate tai khoan moi*****/ 
+                String to = createEntity.getEmail();
+                String subject = "Verity registered account";
+                String content = "Hello, " + createEntity.getUsername()
+                        + "Please verify your newly created account by clicking the following confirmation link to activate your account: "
+                        +"<a href=\"http://localhost:8080/api/client/users/active-account?email="
+                        + createEntity.getEmail()
+                        + "&activeCode=" + createEntity.getActiveCode()
+                        + "\">Active Account</a>";
+                 //tien hanh gui email voi cac tham so khai bao de xac nhan email
+                 emailService.sendEmail(to, subject, content);       
+                /*****end - xu ly xac nhan email khi dang ky crate tai khoan moi*****/
+
                 //c-4 tra ve ket qua cho nguoi dung theo chuan restfullAPI
                 response.put("data", createEntity);
                 response.put("statuscode", 200);
@@ -198,7 +222,41 @@ public class UserServiceCL {
             return new ResponseEntity<>(response, HttpStatus.NOT_IMPLEMENTED);
         }
 
+    }
 
+    /***method xu ly kich hoat tai khoan khi dk co xac nhan gmail*****/
+    public ResponseEntity<Map<String, Object>> activeAccount(String email, String activeCode){
+        //khoi tap bien reponse luu ket qua  tra ve
+        Map<String, Object> response = new HashMap<>();
+
+
+        // nho repo tim user vaf activecode thogn qua method ben repository 
+        Optional<User> optFound = userRepo.findByEmailAndActiveCode(email, activeCode);
+        if(optFound.isPresent()){
+            //neu tim dc thi kich hoat is_active cua user trong csdl tu 0 thanh 1
+            User entityActive = optFound.get();
+            entityActive.setIsActive(1);
+
+            //tien hanh xoa bo active_code di khong can thiet nua
+            entityActive.setActiveCode(null);
+
+            //save lai trang thai vua thay doi
+            userRepo.save(entityActive);
+
+            //tra ve ket qua chuan restfull
+            response.put("data", entityActive);
+            response.put("statuscode", 200);
+            response.put("msg", " active account thanh cong my man oh yeah");
+
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
+            
+        }else{
+            response.put("data", null);
+            response.put("statuscode", 501);
+            response.put("msg", " tai khoan chua dc kich hoat vui long xem lai");
+
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
 
     }
 

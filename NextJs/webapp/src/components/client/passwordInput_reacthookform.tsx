@@ -1,4 +1,6 @@
 /* xu ly nghiep vu an hien password khi b am vao icon con mat
+theo cach thu nhap value lib react hook form chu khong dung
+usestate nhu trc
  */
 "use client";
 
@@ -9,7 +11,7 @@ import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 //goi kieu types cho PasswordInput vao day
 import { PasswordInputTypes } from "@/types/PasswordInputTypes";
 
-export default function PasswordInput({ value, onChange }: PasswordInputTypes) {
+export default function PasswordInput({ register, className }: any) {
   const [showPassword, setShowPassword] = useState(false);
 
   /*
@@ -32,14 +34,17 @@ export default function PasswordInput({ value, onChange }: PasswordInputTypes) {
       {/* //relative: làm cho phần tử cha làm mốc để đặt vị trí của phần tử con */}
       <div className="relative">
         <input
+          //su dung register de react hook form lk dc voiw form passwordInput khi goi den no
+          {...register}
+          ref={(e) => {
+            inputRef.current = e; //gan gia tri cua inputRef
+            register.ref(e); //ket noi voi react hook form
+          }}
           type={showPassword ? "text" : "password"}
-          ref={inputRef}
           id="password"
           className="form-control"
           placeholder="Nhập mật khẩu"
           required
-          value={value} //nhan tu doi so ma component cha truyn props vao component con
-          onChange={onChange} //nhan tu doi so ma component cha truyn props vao component con
         />
         <span onClick={togglePassword} className="toggle-password">
           {showPassword == true && (

@@ -2,6 +2,7 @@ package webcamera.com.vn.webapp.config;
 
 import java.util.Arrays;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,6 +32,9 @@ import webcamera.com.vn.webapp.JWT.JwtFilter;
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
+    /* goi cau hinh client.url port 3000 */
+    @Value("${client.url}")
+    private String clientUrl;
 
     /* giai thich so dong code:
      + .cors: bat CORS(cho phep browser tu domain khacs goi api cua minh )
@@ -55,7 +59,9 @@ public class SecurityConfig {
                                 "/swagger-ui/**",  //cho phep api swagger dc phep qua cong an ninh security
                                 "/v3/api-docs/**",  //cho phep api docs cua swagger dc phep qua cong an ninh
                                 "/api/auth/**",
-                                "/uploads/**"
+                                "/uploads/**",
+                                "/api/client/users/create/**",
+                                "/api/client/users/active-account/**"
                         )
                         .permitAll()  //cho phep truy cap ma khong can kiem tra
                         //quan trong: security phai cho phep OPTIOND request di qua khong can token de tranh loi prelight
@@ -65,7 +71,7 @@ public class SecurityConfig {
                         .authenticated() //yeu cau security kiem tra cac th con lai
 
                 )
-                /*mặc định spring security tạo session trên server(lưu user infog), sessionCreationPolicy.STATELESS 
+                /*mặc định spring security tạo session trên server(lưu user infor), sessionCreationPolicy.STATELESS 
                 ngăn không cho lưu session trên server -> tại sao??? tại vì dùng jwt token(mang thong tin user rồi)
                  -> nên không cần lưu trong sesion*/
                 .sessionManagement(sess->sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -108,7 +114,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource(){
        CorsConfiguration corsConfiguration = new CorsConfiguration(); 
        //cho phep nguon (Origin) tu phia frontend cua ban
-       corsConfiguration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+       corsConfiguration.setAllowedOrigins(Arrays.asList(clientUrl));
        //cho phep cac phuong thuc HTTP can thiet bao gom ca OPTIONS DI KEM
        corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
        //cho phep cac Header quan trong dawc biet la 'Authorization' chua token jwt

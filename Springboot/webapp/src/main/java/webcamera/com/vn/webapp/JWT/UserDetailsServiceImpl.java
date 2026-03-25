@@ -69,7 +69,7 @@ public class UserDetailsServiceImpl implements UserDetailsService{
         + chuyen doi ra sao:
          ++ no duyet qua tung phan(role) trong stream
          ++ voi moi role, no thuc hien mot ham lambda 
-         ++ ham nay tao  ra mot doi tuong SimpleGrantedAuthority(no la lop trien khai cua GrantedAuthority), su dung te nvai tro(role.getName) lam chuoi quyen han(vd: role.getName la admin, no se tao ra new SimpleGrantedAuthority("ADMIN"))
+         ++ ham nay tao  ra mot doi tuong SimpleGrantedAuthority(no la lop trien khai cua GrantedAuthority), su dung ten vai tro(role.getName) lam chuoi quyen han(vd: role.getName la admin, no se tao ra new SimpleGrantedAuthority("ADMIN"))
 
         #5  collect(Collectors.toList());
          + day la thao tac ket thuc cua stream
@@ -87,6 +87,7 @@ public class UserDetailsServiceImpl implements UserDetailsService{
          
       */
        List<GrantedAuthority> authorities = user.getListRoles().stream().map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList());
+       
        return new User(user.getUsername(), user.getPassword(), authorities);
     }
 }

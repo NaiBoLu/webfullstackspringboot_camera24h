@@ -22,4 +22,7 @@ public class UserCreateRequestDTO_CL {
     @Length(min = 6, max = 128, message = "mk it nhat la phai co 6 -128 ky tu")
     private String password;
 
+    @NotBlank(message = "Khong dc de trong email")
+    private String email;
+
 }

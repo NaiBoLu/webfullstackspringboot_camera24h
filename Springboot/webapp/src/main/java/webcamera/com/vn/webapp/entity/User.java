@@ -61,6 +61,9 @@ public class User {
     @Column(name = "is_active")
     private Integer isActive;
 
+    @Column(name = "active_code")
+    private String activeCode;
+
     // updatable = false: không cho phép cập nhật sau khi tạo đảm bảo tính truy vết lịch sử
     /*@CreationTimestamp:Tự động gán giá trị thời gian hiện tại (NOW()) cho trường này khi
      bản ghi được chèn (INSERT) vào CSDL.*/

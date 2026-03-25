@@ -40,6 +40,14 @@ public class UserControllerCL {
     }
 
 
+    /*********method active account*************/
+    @GetMapping("/active-account")
+    public ResponseEntity<Map<String, Object>> ActiveAccount(@RequestParam String email,
+                                                            @RequestParam String activeCode){
+        //nho service kich hoat account
+        return userServiceCL.activeAccount(email, activeCode);                                                            
+   }
+ 
    /********************3 - delete**********************************/
   @CrossOrigin(origins = "http://localhost:3000")
    @DeleteMapping("/delete/{id}")
